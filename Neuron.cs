@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace NeuralNetwork
 {
@@ -7,7 +8,7 @@ namespace NeuralNetwork
         /// <summary>
         /// Массив весовых коэффициентов (синаптические веса)
         /// </summary>
-        private double[] Weights { get; }
+        private List<double> Weights { get; }
         /// <summary>
         /// Пороговый элемент (стр. 43)
         /// </summary>
@@ -18,36 +19,29 @@ namespace NeuralNetwork
         private Func<double, double> ActivationFunction { get; }
 
 
-        public Neuron(int Dimension, Func<double, double> ActivationFunction, double leftRangeLimit = -1.0, double rightRangeLimit = 1.0, double Bias = 0.0)
+        public Neuron(Func<double, double> ActivationFunction, List<double> Weights = null, double Bias = 0.0)
         {
+            this.Weights = Weights;
             this.ActivationFunction = ActivationFunction;
             this.Bias = Bias;
-
-            this.Weights = new double[Dimension];
-
-            Random random = new Random();
-
-            for (int i = 0; i < Dimension; i++)
-                Weights[i] = random.NextDouble() * (rightRangeLimit - leftRangeLimit) + leftRangeLimit;
         }
 
-        private double Adder(double[] inputSignals)
+        private double Adder(List<double> inputSignals)
         {
-            if (inputSignals.Length != this.Weights.Length)
+            if (inputSignals.Count != Weights.Count)
                 throw new ArgumentOutOfRangeException("inputSignals", "Количество входных сигналов не равно количеству весовых коэффициентов");
 
-            double linearCombinerOutput = 0.0;
+            double linearCombinerOutput = 0.0;           
 
-            for (int i = 0; i < inputSignals.Length; i++)
-                linearCombinerOutput += inputSignals[i] * this.Weights[i];
+            for (int i = 0; i < inputSignals.Count; i++)
+                linearCombinerOutput += inputSignals[i] * Weights[i];
 
-            return linearCombinerOutput + this.Bias;
+            return linearCombinerOutput + Bias;
         }
-
-        public double GetActivationPotential(double[] inputSignals)
+        public double GetActivationPotential(List<double> inputSignals)
         {
             double linearCombinerOutput = Adder(inputSignals);
-            return this.ActivationFunction(linearCombinerOutput);
+            return ActivationFunction(linearCombinerOutput);
         }
     }
 }
