@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace NeuralNetwork
 {
@@ -15,11 +18,8 @@ namespace NeuralNetwork
             this.OutputLayer = OutputLayer;
         }
 
-        public List<double> PropagateForward()
+        public List<double> PropagateForward(List<double> signals)
         {
-            // Получаем сигналы от входного слоя
-            List<double> signals = InputLayer.ProduceSignals();
-
             // Передаем сигналы по скрытым слоям
             foreach (Layer hiddenLayer in HiddenLayers)
                 signals = hiddenLayer.ProduceSignals(signals);
