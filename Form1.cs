@@ -34,7 +34,7 @@ namespace NeuralNetwork
                 foreach (var weights in layer)
                     neurons.Add(new Neuron(ActivationFunctions.Func1, weights));
 
-                hiddenLayers.Add(new Layer(LayerType.Hidden, neurons));
+                hiddenLayers.Add(new Layer(neurons));
             }
 
             #endregion
@@ -52,7 +52,7 @@ namespace NeuralNetwork
             for (int i = 0; i < outputLayerDimension; i++)
                 outputNeurons.Add(new Neuron(ActivationFunctions.Func1, Weights: outputLayerWeights[i]));
 
-            Layer outputLayer = new Layer(LayerType.Output, outputNeurons);
+            Layer outputLayer = new Layer(outputNeurons);
             #endregion
 
             // Инициализируем нейросеть с помощью слоев (скрытых и выходного)
@@ -61,7 +61,7 @@ namespace NeuralNetwork
             // Формируем входной сигнал
             List<double> inputSignals = new List<double> { 0.0, 0.0, 1.0 };
 
-            // Прогоняем входной сигнал через нейросеть и сигналы на выходе
+            // Прогоняем входной сигнал через нейросеть и получаем сигналы на выходе
             List<double> outputSignal = network.PropagateForward(inputSignals);
         }
     }

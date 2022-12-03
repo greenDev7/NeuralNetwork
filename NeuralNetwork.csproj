@@ -54,7 +54,6 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Layer.cs" />
-    <Compile Include="LayerType.cs" />
     <Compile Include="Network.cs" />
     <Compile Include="Neuron.cs" />
     <Compile Include="Program.cs" />

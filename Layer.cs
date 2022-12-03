@@ -4,12 +4,10 @@ namespace NeuralNetwork
 {
     public class Layer
     {
-        public LayerType LayerType { get; }
         public List<Neuron> Neurons { get; }
 
-        public Layer(LayerType LayerType, List<Neuron> Neurons)
+        public Layer(List<Neuron> Neurons)
         {
-            this.LayerType = LayerType;
             this.Neurons = Neurons;            
         }
 
