@@ -16,41 +16,53 @@ namespace NeuralNetwork
         {
             string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-            // Инициализируем скрытые слои
+            #region Инициализируем скрытые слои
+
+            // Читаем весовые коэффициенты из файла
             int hiddenLayersCount = 2;
             int[] hiddenLayersDimensions = new int[2] { 3, 2 };
             List<List<List<double>>> hiddenLayersWeights =
-                WeightsReaderWriter.ReadHiddenLayersWeightsFromCSVFile(hiddenLayersCount, hiddenLayersDimensions, Path.Combine(docPath, "weightsOfHiddenLayers.csv"));
+                WeightsReader.ReadHiddenLayersWeightsFromCSVFile(hiddenLayersCount, hiddenLayersDimensions, Path.Combine(docPath, "weightsOfHiddenLayers.csv"));
 
-            // Инициализируем выходной слой
-            int outputLayerDimension = 2; // Количество нейронов на выходном слое
-            List<List<double>> outputLayerWeights = WeightsReaderWriter.ReadOutputLayerWeightsFromCSVFile(Path.Combine(docPath, "weightsOfOutputLayer.csv"));
+            // Формируем скрытые слои
+            /// TODO: Можно добавить массив с функциями активаций, чтобы каждый скрытый слой имел свою функцию активации 
+            List<Layer> hiddenLayers = new List<Layer>();
+            foreach (var layer in hiddenLayersWeights)
+            {
+                List<Neuron> neurons = new List<Neuron>();
 
+                foreach (var weights in layer)
+                    neurons.Add(new Neuron(ActivationFunctions.Func1, weights));
 
-            int inputLayerDimension = 3; // Количество "нейронов" во входном слое 
-            List<double> inputSignals = new List<double>();
-            inputSignals = new List<double> { 0.0, 0.0, 1.0 };
+                hiddenLayers.Add(new Layer(LayerType.Hidden, neurons));
+            }
 
+            #endregion
 
-            List<Neuron> inputNeurons = new List<Neuron>();
+            #region Инициализируем выходной слой
+
+            // Задаем количество нейронов на выходном слое
+            int outputLayerDimension = 2;
+
+            // Читаем весовые коэффициенты из файла
+            List<List<double>> outputLayerWeights = WeightsReader.ReadOutputLayerWeightsFromCSVFile(Path.Combine(docPath, "weightsOfOutputLayer.csv"));
+
+            // Формируем выходной слой
             List<Neuron> outputNeurons = new List<Neuron>();
-            List<Neuron> firstHiddenLayerNeurons = new List<Neuron>();
-
-            for (int i = 0; i < inputLayerDimension; i++)
-                inputNeurons.Add(new Neuron(ActivationFunctions.Func1));
-
             for (int i = 0; i < outputLayerDimension; i++)
                 outputNeurons.Add(new Neuron(ActivationFunctions.Func1, Weights: outputLayerWeights[i]));
 
-            //for (int i = 0; i < hiddenLayersDimensions[0]; i++)
-            //    firstHiddenLayerNeurons.Add(new Neuron(ActivationFunctions.Func1, Weights: firstHiddenLayerWeights[0]));
+            Layer outputLayer = new Layer(LayerType.Output, outputNeurons);
+            #endregion
 
+            // Инициализируем нейросеть с помощью слоев (скрытых и выходного)
+            Network network = new Network(hiddenLayers, outputLayer);
 
-            Layer inputLayer = new Layer(inputNeurons, LayerType.Input);
-            Layer outputLayer = new Layer(outputNeurons, LayerType.Output);
-            Layer firstHiddenLayer = new Layer(firstHiddenLayerNeurons, LayerType.Hidden);
+            // Формируем входной сигнал
+            List<double> inputSignals = new List<double> { 0.0, 0.0, 1.0 };
 
-            Network network = new Network(inputLayer, new List<Layer> { firstHiddenLayer }, outputLayer);
+            // Прогоняем входной сигнал через нейросеть и сигналы на выходе
+            List<double> outputSignal = network.PropagateForward(inputSignals);
         }
     }
 }
