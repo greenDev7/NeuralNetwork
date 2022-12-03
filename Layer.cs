@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace NeuralNetwork
 {
     public class Layer
     {
+        public LayerType LayerType { get; }
         public List<Neuron> Neurons { get; }
-        public LayerType LayerType { get; set; }
 
-        public Layer(List<Neuron> Neurons, LayerType LayerType)
+        public Layer(LayerType LayerType, List<Neuron> Neurons)
         {
-            this.Neurons = Neurons;
             this.LayerType = LayerType;
+            this.Neurons = Neurons;            
         }
 
         internal List<double> ProduceSignals(List<double> previousLayerSignals)
