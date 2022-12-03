@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace NeuralNetwork
 {
-    public static class WeightsReaderWriter
+    public static class WeightsReader
     {
         public static List<List<List<double>>> ReadHiddenLayersWeightsFromCSVFile(int hiddenLayersCount, int[] hiddenLayerDimensions, string weightsOfHiddenLayerFileName)
         {
@@ -30,7 +30,6 @@ namespace NeuralNetwork
 
             return hiddenLayersWeights;
         }
-
         public static List<List<double>> ReadOutputLayerWeightsFromCSVFile(string outputWeightsFile)
         {
             List<List<double>> outputLayerWeights = new List<List<double>>();
