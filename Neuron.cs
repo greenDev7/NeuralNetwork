@@ -36,12 +36,12 @@ namespace NeuralNetwork
             for (int i = 0; i < inputSignals.Count; i++)
                 linearCombinerOutput += inputSignals[i] * Weights[i];
 
-            return linearCombinerOutput + Bias;
+            return linearCombinerOutput;
         }
         public double GetActivationPotential(List<double> inputSignals)
         {
             double linearCombinerOutput = Adder(inputSignals);
-            return ActivationFunction(linearCombinerOutput);
+            return ActivationFunction(linearCombinerOutput + Bias);
         }
     }
 }
