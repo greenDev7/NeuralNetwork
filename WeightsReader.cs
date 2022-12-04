@@ -36,11 +36,11 @@ namespace NeuralNetwork
 
             return hiddenLayersWeights;
         }
-        public static List<List<double>> ReadOutputLayerWeightsFromCSVFile(string outputWeightsFile)
+        public static List<List<double>> ReadOutputLayerWeightsFromCSVFile(string fileName)
         {
             List<List<double>> outputLayerWeights = new List<List<double>>();
 
-            string[] lines = File.ReadAllLines(outputWeightsFile);
+            string[] lines = File.ReadAllLines(fileName);         
 
             foreach (string line in lines)
                 outputLayerWeights.Add(line.Split(';').Select(x => Convert.ToDouble(x)).ToList());
