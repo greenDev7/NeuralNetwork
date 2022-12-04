@@ -26,21 +26,21 @@ namespace NeuralNetwork
             this.Bias = Bias;
         }
 
-        private double Adder(List<double> inputSignals)
+        private double Adder(List<double> inputSignal)
         {
-            if (inputSignals.Count != Weights.Count)
+            if (inputSignal.Count != Weights.Count)
                 throw new ArgumentOutOfRangeException("inputSignals", "Количество входных сигналов не равно количеству весовых коэффициентов");
 
             double linearCombinerOutput = 0.0;           
 
-            for (int i = 0; i < inputSignals.Count; i++)
-                linearCombinerOutput += inputSignals[i] * Weights[i];
+            for (int i = 0; i < inputSignal.Count; i++)
+                linearCombinerOutput += inputSignal[i] * Weights[i];
 
             return linearCombinerOutput;
         }
-        public double GetActivationPotential(List<double> inputSignals)
+        public double GetActivationPotential(List<double> inputSignal)
         {
-            double linearCombinerOutput = Adder(inputSignals);
+            double linearCombinerOutput = Adder(inputSignal);
             return ActivationFunction(linearCombinerOutput + Bias);
         }
     }

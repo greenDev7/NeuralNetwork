@@ -54,10 +54,10 @@ namespace NeuralNetwork
             Network network = new Network(hiddenLayers, outputLayer);
 
             // Формируем входной сигнал
-            List<double> inputSignals = new List<double> { 0.0, 0.0, 1.0 };
+            List<double> functionSignal = new List<double> { 0.0, 0.0, 1.0 };
 
             // Прогоняем входной сигнал через нейросеть и получаем сигналы на выходе
-            List<double> outputSignal = network.PropagateForward(inputSignals);
+            List<double> outputSignal = network.PropagateForward(functionSignal);
 
             // Записываем весовые коэффициенты в файлы
             network.WriteHiddenWeightsToCSVFile(Path.Combine(docPath, "hiddenLayers.csv"));

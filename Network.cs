@@ -15,14 +15,14 @@ namespace NeuralNetwork
             this.OutputLayer = OutputLayer;
         }
 
-        public List<double> PropagateForward(List<double> signals)
+        public List<double> PropagateForward(List<double> functionSignal)
         {
-            // Передаем сигналы по скрытым слоям
+            // Передаем сигнал по скрытым слоям
             foreach (Layer hiddenLayer in HiddenLayers)
-                signals = hiddenLayer.ProduceSignals(signals);
+                functionSignal = hiddenLayer.ProduceSignals(functionSignal);
 
-            // Возвращаем сигналы от выходного слоя
-            return OutputLayer.ProduceSignals(signals);
+            // Возвращаем сигнал от выходного слоя
+            return OutputLayer.ProduceSignals(functionSignal);
         }
         public void WriteHiddenWeightsToCSVFile(string fileName)
         {
