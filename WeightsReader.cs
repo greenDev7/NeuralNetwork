@@ -7,13 +7,19 @@ namespace NeuralNetwork
 {
     public static class WeightsReader
     {
-        public static List<List<List<double>>> ReadHiddenLayersWeightsFromCSVFile(int hiddenLayersCount, int[] hiddenLayerDimensions, string weightsOfHiddenLayerFileName)
+        public static List<List<List<double>>> ReadHiddenLayersWeightsFromCSVFile(string fileName)
         {
             List<List<List<double>>> hiddenLayersWeights = new List<List<List<double>>>();
 
-            string[] lines = File.ReadAllLines(weightsOfHiddenLayerFileName);
+            string[] lines = File.ReadAllLines(fileName);
 
-            int startPosition = 0;
+            // Считываем количество скрытых слоев
+            int hiddenLayersCount = int.Parse(lines[0].Split(';')[1]);
+
+            // Считываем размерности скрытых слоев
+            List<int> hiddenLayerDimensions = lines[1].Split(';').Skip(1).Select(x => Convert.ToInt32(x)).ToList();
+
+            int startPosition = 2;
             for (int i = 0; i < hiddenLayersCount; i++)
             {
                 List<List<double>> currentLayerWeights = new List<List<double>>();
