@@ -8,7 +8,7 @@ namespace NeuralNetwork
         /// <summary>
         /// Массив весовых коэффициентов (синаптические веса)
         /// </summary>
-        private List<double> Weights { get; }
+        public List<double> Weights { get; }
         /// <summary>
         /// Пороговый элемент (стр. 43)
         /// </summary>

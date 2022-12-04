@@ -58,6 +58,10 @@ namespace NeuralNetwork
 
             // Прогоняем входной сигнал через нейросеть и получаем сигналы на выходе
             List<double> outputSignal = network.PropagateForward(inputSignals);
+
+            // Записываем весовые коэффициенты в файлы
+            network.WriteHiddenWeightsToCSVFile(Path.Combine(docPath, "hiddenLayers.csv"));
+            network.WriteOutputWeightsToCSVFile(Path.Combine(docPath, "outputWeights.csv"));
         }
     }
 }
