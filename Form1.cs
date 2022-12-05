@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace NeuralNetwork
@@ -12,7 +13,7 @@ namespace NeuralNetwork
             InitializeComponent();            
         }
 
-        private void Form1_Load(object sender, System.EventArgs e)
+        private void Form1_Load(object sender, EventArgs e)
         {
             string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
@@ -30,7 +31,7 @@ namespace NeuralNetwork
                 List<Neuron> neurons = new List<Neuron>();
 
                 foreach (var weights in layer)
-                    neurons.Add(new Neuron(ActivationFunctions.Func1, weights));
+                    neurons.Add(new Neuron(ActivationFunctions.Func1, Weights: weights.Skip(1).ToList(), Bias: weights[0]));
 
                 hiddenLayers.Add(new Layer(neurons));
             }
@@ -45,7 +46,7 @@ namespace NeuralNetwork
             // Формируем выходной слой
             List<Neuron> outputNeurons = new List<Neuron>();
             for (int i = 0; i < outputLayerWeights.Count; i++)
-                outputNeurons.Add(new Neuron(ActivationFunctions.Func1, Weights: outputLayerWeights[i]));
+                outputNeurons.Add(new Neuron(ActivationFunctions.Func1, Weights: outputLayerWeights[i].Skip(1).ToList(), Bias: outputLayerWeights[i][0]));
 
             Layer outputLayer = new Layer(outputNeurons);
             #endregion
@@ -56,7 +57,7 @@ namespace NeuralNetwork
             // Формируем входной сигнал
             List<double> functionSignal = new List<double> { 0.0, 0.0, 1.0 };
 
-            // Прогоняем входной сигнал через нейросеть и получаем сигналы на выходе
+            // Прогоняем входной сигнал через нейросеть и получаем сигнал на выходе
             List<double> outputSignal = network.PropagateForward(functionSignal);
 
             // Записываем весовые коэффициенты в файлы
