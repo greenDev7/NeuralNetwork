@@ -33,7 +33,7 @@ namespace NeuralNetwork
 
             foreach (Layer hiddenLayer in HiddenLayers)
                 foreach (Neuron neuron in hiddenLayer.Neurons)
-                    textWriter.WriteLine(string.Join(";", neuron.Weights));
+                    textWriter.WriteLine("{0};{1}", neuron.Bias, string.Join(";", neuron.Weights));
 
             textWriter.Close();
         }
@@ -42,7 +42,7 @@ namespace NeuralNetwork
             TextWriter textWriter = new StreamWriter(fileName);
 
             foreach (Neuron neuron in OutputLayer.Neurons)
-                textWriter.WriteLine(string.Join(";", neuron.Weights));
+                textWriter.WriteLine("{0};{1}", neuron.Bias, string.Join(";", neuron.Weights));
 
             textWriter.Close();
         }

@@ -12,7 +12,7 @@ namespace NeuralNetwork
         /// <summary>
         /// Пороговый элемент (стр. 43)
         /// </summary>
-        private double Bias { get; }
+        public double Bias { get; }
         /// <summary>
         /// Функция активации
         /// </summary>
