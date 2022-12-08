@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -16,6 +17,11 @@ namespace NeuralNetwork
         private void Form1_Load(object sender, EventArgs e)
         {
             string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            List<List<double>> imageMatrix = ImageHelper.ConvertImageToPixelMatrix(Path.Combine(docPath, "2_test.png"));
+
+            ImageHelper.WritePixelMatrixToCSVFile(imageMatrix, Path.Combine(docPath, "2_test.csv"));
+            
 
             #region Инициализируем скрытые слои
 
