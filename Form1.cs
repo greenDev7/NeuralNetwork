@@ -60,12 +60,19 @@ namespace NeuralNetwork
             //Network network = new Network(hiddenLayers, outputLayer);
 
             // Инициализируем нейросеть с помощью заданных параметров
-            Network network = new Network(3, 5, ActivationFunctions.ThresholdFunction, new int[] { 4 }, new Func<double, double>[] { ActivationFunctions.ThresholdFunction });
+            Func<double, double>[] hiddenActivationFunctions = new Func<double, double>[]
+            {
+                ActivationFunctions.LogisticFunction,
+                ActivationFunctions.ThresholdFunction,
+                ActivationFunctions.LogisticFunction
+            };
+
+            Network network = new Network(10, 10, ActivationFunctions.ThresholdFunction, new int[] { 3, 5, 2 }, hiddenActivationFunctions);
 
 
             // Записываем весовые коэффициенты в файлы
             network.WriteHiddenWeightsToCSVFile(Path.Combine(docPath, "hiddenLayers.csv"));
             network.WriteOutputWeightsToCSVFile(Path.Combine(docPath, "outputWeights.csv"));
-        }
+        }      
     }
 }

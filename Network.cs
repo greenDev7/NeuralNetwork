@@ -10,6 +10,11 @@ namespace NeuralNetwork
         public List<Layer> HiddenLayers { get; }
         public Layer OutputLayer { get; }
 
+        /// <summary>
+        /// Инициализирует нейросеть с помощью скрытых слоев и выходного слоя
+        /// </summary>
+        /// <param name="HiddenLayers">список скрытых слоев</param>
+        /// <param name="OutputLayer">выходной слой</param>
         public Network(List<Layer> HiddenLayers, Layer OutputLayer)
         {
             this.HiddenLayers = HiddenLayers;
@@ -26,6 +31,9 @@ namespace NeuralNetwork
         /// <param name="hiddenActivationFunctions">массив функций активаций нейронов скрытых слоев</param>
         public Network(int inputLayerNeuronsCount, int outputLayerNeuronsCount, Func<double, double> outputActivationFunction, int[] hiddenLayersDimensions = null, Func<double, double>[] hiddenActivationFunctions = null)
         {
+            if (hiddenLayersDimensions.Length != hiddenActivationFunctions.Length)
+                throw new Exception("Количество скрытых слоев не равно количеству функций активации для скрытых слоев");
+
             Random random = new Random();
 
             // Если есть скрытые слои
@@ -82,6 +90,7 @@ namespace NeuralNetwork
         /// <param name="weightsMinValue">левая граница интервала случайных чисел</param>
         /// <param name="weightsMaxValue">правая граница интервала случайных чисел</param>
         /// <param name="activationFunction">функция активации</param>
+        /// <param name="random">экземпляр генератора случайных чисел</param>
         /// <returns></returns>
         private List<Neuron> CreateNeurons(int neuronsCount, int weightsCount, double weightsMinValue, double weightsMaxValue, Func<double, double> activationFunction, Random random)
         {
@@ -99,6 +108,7 @@ namespace NeuralNetwork
         /// <summary>
         /// Возвращает случайное число в заданном интервале 
         /// </summary>
+        /// <param name="random">экземпляр генератора случайных чисел</param>
         /// <param name="minValue">левая граница интеравала</param>
         /// <param name="maxValue">правая граница интеравала</param>
         /// <returns></returns>
@@ -108,20 +118,21 @@ namespace NeuralNetwork
         }
 
         /// <summary>
-        /// Возвращает список весовых коэффициентов со случайными значениями
+        /// Возвращает список весовых коэффициентов инициализированных случайными значениями
         /// </summary>
         /// <param name="weightsCount">количество весовых коэффициентов</param>
         /// <param name="minValue">левая граница интервала случайных чисел</param>
         /// <param name="maxValue">правая граница интервала случайных чисел</param>
+        /// <param name="random">экземпляр генератора случайных чисел</param>
         /// <returns></returns>
         private List<double> CreateRandomWeights(int weightsCount, double minValue, double maxValue, Random random)
         {
-            List<double> vector = new List<double>();
+            List<double> weights = new List<double>();
 
             for (int i = 0; i < weightsCount; i++)
-                vector.Add(CreateRandomValue(random, minValue, maxValue));
+                weights.Add(CreateRandomValue(random, minValue, maxValue));
 
-            return vector;
+            return weights;
         }
 
         public void WriteHiddenWeightsToCSVFile(string fileName)
