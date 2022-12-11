@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -28,7 +29,6 @@ namespace NeuralNetwork
         {
             TextWriter textWriter = new StreamWriter(fileName);
 
-            textWriter.WriteLine(string.Join(";", "hiddenLayersCount", HiddenLayers.Count));
             textWriter.WriteLine(string.Format("{0};{1}", "hiddenLayersDimensions", string.Join(";", HiddenLayers.Select(x => x.Neurons.Count))));
 
             foreach (Layer hiddenLayer in HiddenLayers)
