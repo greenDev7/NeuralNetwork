@@ -14,6 +14,54 @@ namespace NeuralNetwork
         {
             this.HiddenLayers = HiddenLayers;
             this.OutputLayer = OutputLayer;
+        }        
+
+        /// <summary>
+        /// Инициализирует нейросеть с помощью входных параметров
+        /// </summary>
+        /// <param name="inputLayerNeuronsCount">количество нейронов на входном слое</param>
+        /// <param name="outputLayerNeuronsCount">количество нейронов на выходном слое</param>
+        /// <param name="outputActivationFunction">функция активации у нейронов выходного слоя</param>
+        /// <param name="hiddenLayersDimensions">размерности скрытых слоев</param>
+        /// <param name="hiddenActivationFunctions">массив функций активаций нейронов скрытых слоев</param>
+        public Network(int inputLayerNeuronsCount, int outputLayerNeuronsCount, Func<double, double> outputActivationFunction, int[] hiddenLayersDimensions = null, Func<double, double>[] hiddenActivationFunctions = null)
+        {
+            Random random = new Random();
+
+            // Если есть скрытые слои
+            if (hiddenLayersDimensions != null)
+            {
+                #region Инициализируем весовые коэффициенты на скрытых слоях
+
+                HiddenLayers = new List<Layer>();
+
+                // Сначала инициализируем первый скрытый слой
+
+                // Количество весовых коэффициентов у каждого нейрона первого скрытого слоя равно количеству нейронов входного слоя
+                HiddenLayers.Add(new Layer(CreateNeurons(hiddenLayersDimensions[0], inputLayerNeuronsCount, -1.0, 1.0, hiddenActivationFunctions[0], random)));
+
+                // Если скрытых слоев больше 1
+                if (hiddenLayersDimensions.Length > 1)
+                {
+                    // Количество весовых коэффициентов на втором и последующих скрытых слоях равно количеству нейронов на предыдущем скрытом слое
+                    // Еще раз, первый скрытый слой уже проинициализирован, поэтому начинаем со второго (h = 1)
+                    for (int h = 1; h < hiddenLayersDimensions.Length; h++)
+                        HiddenLayers.Add(new Layer(CreateNeurons(hiddenLayersDimensions[h], hiddenLayersDimensions[h - 1], -1.0, 1.0, hiddenActivationFunctions[h], random)));
+                }
+
+                #endregion
+            }
+
+            #region Инициализируем весовые коэффициенты выходного слоя
+
+            // Если есть скрытые слои, то количество весовых коэффицинтов у нейронов выходного слоя равно количеству нейронов последнего скрытого слоя
+            // Если скрытых слоев нет, то количество весовых коэффицинтов у нейронов выходного слоя равно количеству нейронов входного слоя
+
+            int outputWeightsCount = hiddenLayersDimensions != null ? hiddenLayersDimensions.Last() : inputLayerNeuronsCount;
+
+            OutputLayer = new Layer(CreateNeurons(outputLayerNeuronsCount, outputWeightsCount, -1.0, 1.0, outputActivationFunction, random));
+
+            #endregion
         }
 
         public List<double> PropagateForward(List<double> functionSignal)
@@ -25,6 +73,57 @@ namespace NeuralNetwork
             // Возвращаем сигнал от выходного слоя
             return OutputLayer.ProduceSignals(functionSignal);
         }
+
+        /// <summary>
+        /// Возвращает список нейронов, инициализированных весовыми коэффициентами
+        /// </summary>
+        /// <param name="neuronsCount">количество нейронов</param>
+        /// <param name="weightsCount">количество весовых коэффициентов в каждом нейроне</param>
+        /// <param name="weightsMinValue">левая граница интервала случайных чисел</param>
+        /// <param name="weightsMaxValue">правая граница интервала случайных чисел</param>
+        /// <param name="activationFunction">функция активации</param>
+        /// <returns></returns>
+        private List<Neuron> CreateNeurons(int neuronsCount, int weightsCount, double weightsMinValue, double weightsMaxValue, Func<double, double> activationFunction, Random random)
+        {
+            List<Neuron> neurons = new List<Neuron>();
+
+            for (int i = 0; i < neuronsCount; i++)
+            {
+                List<double> weights = CreateRandomWeights(weightsCount, weightsMinValue, weightsMaxValue, random);
+                neurons.Add(new Neuron(activationFunction, weights, CreateRandomValue(random, weightsMinValue, weightsMaxValue)));
+            }
+
+            return neurons;
+        }
+
+        /// <summary>
+        /// Возвращает случайное число в заданном интервале 
+        /// </summary>
+        /// <param name="minValue">левая граница интеравала</param>
+        /// <param name="maxValue">правая граница интеравала</param>
+        /// <returns></returns>
+        private double CreateRandomValue(Random random, double minValue, double maxValue)
+        {
+            return random.NextDouble() * (maxValue - minValue) + minValue;
+        }
+
+        /// <summary>
+        /// Возвращает список весовых коэффициентов со случайными значениями
+        /// </summary>
+        /// <param name="weightsCount">количество весовых коэффициентов</param>
+        /// <param name="minValue">левая граница интервала случайных чисел</param>
+        /// <param name="maxValue">правая граница интервала случайных чисел</param>
+        /// <returns></returns>
+        private List<double> CreateRandomWeights(int weightsCount, double minValue, double maxValue, Random random)
+        {
+            List<double> vector = new List<double>();
+
+            for (int i = 0; i < weightsCount; i++)
+                vector.Add(CreateRandomValue(random, minValue, maxValue));
+
+            return vector;
+        }
+
         public void WriteHiddenWeightsToCSVFile(string fileName)
         {
             TextWriter textWriter = new StreamWriter(fileName);
@@ -37,6 +136,7 @@ namespace NeuralNetwork
 
             textWriter.Close();
         }
+
         public void WriteOutputWeightsToCSVFile(string fileName)
         {
             TextWriter textWriter = new StreamWriter(fileName);
