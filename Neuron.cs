@@ -38,6 +38,7 @@ namespace NeuralNetwork
 
             return linearCombinerOutput;
         }
+
         public double GetActivationPotential(List<double> inputSignal)
         {
             double linearCombinerOutput = Adder(inputSignal);

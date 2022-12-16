@@ -24,12 +24,12 @@ namespace NeuralNetwork
         /// <summary>
         /// Инициализирует нейросеть с помощью входных параметров
         /// </summary>
-        /// <param name="inputLayerNeuronsCount">количество нейронов на входном слое</param>
+        /// <param name="inputLayerDimension">количество входов нейросети</param>
         /// <param name="outputLayerNeuronsCount">количество нейронов на выходном слое</param>
         /// <param name="outputActivationFunction">функция активации у нейронов выходного слоя</param>
         /// <param name="hiddenLayersDimensions">размерности скрытых слоев</param>
         /// <param name="hiddenActivationFunctions">массив функций активаций нейронов скрытых слоев</param>
-        public Network(int inputLayerNeuronsCount, int outputLayerNeuronsCount, Func<double, double> outputActivationFunction, int[] hiddenLayersDimensions = null, Func<double, double>[] hiddenActivationFunctions = null)
+        public Network(int inputLayerDimension, int outputLayerNeuronsCount, Func<double, double> outputActivationFunction, int[] hiddenLayersDimensions = null, Func<double, double>[] hiddenActivationFunctions = null)
         {
             if (hiddenLayersDimensions.Length != hiddenActivationFunctions.Length)
                 throw new Exception("Количество скрытых слоев не равно количеству функций активации для скрытых слоев");
@@ -46,7 +46,7 @@ namespace NeuralNetwork
                 // Сначала инициализируем первый скрытый слой
 
                 // Количество весовых коэффициентов у каждого нейрона первого скрытого слоя равно количеству нейронов входного слоя
-                HiddenLayers.Add(new Layer(CreateNeurons(hiddenLayersDimensions[0], inputLayerNeuronsCount, -1.0, 1.0, hiddenActivationFunctions[0], random)));
+                HiddenLayers.Add(new Layer(CreateNeurons(hiddenLayersDimensions[0], inputLayerDimension, -1.0, 1.0, hiddenActivationFunctions[0], random)));
 
                 // Если скрытых слоев больше 1
                 if (hiddenLayersDimensions.Length > 1)
@@ -65,7 +65,7 @@ namespace NeuralNetwork
             // Если есть скрытые слои, то количество весовых коэффицинтов у нейронов выходного слоя равно количеству нейронов последнего скрытого слоя
             // Если скрытых слоев нет, то количество весовых коэффицинтов у нейронов выходного слоя равно количеству нейронов входного слоя
 
-            int outputWeightsCount = hiddenLayersDimensions != null ? hiddenLayersDimensions.Last() : inputLayerNeuronsCount;
+            int outputWeightsCount = hiddenLayersDimensions != null ? hiddenLayersDimensions.Last() : inputLayerDimension;
 
             OutputLayer = new Layer(CreateNeurons(outputLayerNeuronsCount, outputWeightsCount, -1.0, 1.0, outputActivationFunction, random));
 
@@ -156,6 +156,55 @@ namespace NeuralNetwork
                 textWriter.WriteLine("{0};{1}", neuron.Bias, string.Join(";", neuron.Weights));
 
             textWriter.Close();
+        }
+
+        public double Train(List<List<double>> trainingSet)
+        {
+            double totalNetworkErrorEnergySum = 0.0;
+
+            foreach (List<double> functionSignal in trainingSet)
+            {
+                List<double> desiredResponse = GetDesiredResponse(functionSignal);
+                List<double> outputSignal = PropagateForward(functionSignal);
+                List<double> errorSignal = GetErrorSignal(desiredResponse, outputSignal);
+
+                double currentErrorEnergy = GetCurrentErrorEnergy(errorSignal);
+                totalNetworkErrorEnergySum += currentErrorEnergy;
+
+                PropagateBackward(errorSignal);
+            }
+
+            return totalNetworkErrorEnergySum / trainingSet.Count;
+        }
+
+        private void PropagateBackward(List<double> errorSignal)
+        {
+            throw new NotImplementedException();
+        }
+
+        private List<double> GetErrorSignal(List<double> desiredResponse, List<double> outputSignal)
+        {
+            List<double> errorSignal = new List<double>();
+
+            for (int i = 0; i < desiredResponse.Count; i++)
+                errorSignal.Add(desiredResponse[i] - outputSignal[i]);
+
+            return errorSignal;
+        }
+
+        private double GetCurrentErrorEnergy(List<double> errorSignal)
+        {
+            double sum = 0.0;
+
+            for (int i = 0; i < errorSignal.Count; i++)
+                sum += Math.Pow(errorSignal[i], 2.0);
+
+            return 0.5 * sum;
+        }
+
+        private List<double> GetDesiredResponse(List<double> inputSignal)
+        {
+            throw new NotImplementedException();
         }
     }
 }
