@@ -17,8 +17,7 @@ namespace NeuralNetwork
         private void Form1_Load(object sender, EventArgs e)
         {
             string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            //string trainDir = Path.Combine(docPath, "TrainingSet");
-            //string zeroDir = Path.Combine(trainDir, "2");
+            string trainDir = Path.Combine(docPath, "TrainingSet", "2");
 
             //string[] files = Directory.GetFiles(zeroDir);
 
@@ -40,11 +39,11 @@ namespace NeuralNetwork
             //string[] MyRandomArray = digitImagesList.OrderBy(x => rnd.Next()).ToArray();
 
 
-            //List<List<double>> imageMatrix = ImageHelper.ConvertImageToPixelMatrix(Path.Combine(docPath, "5_1.png"));
+            List<List<double>> imageMatrix = ImageHelper.ConvertImageToPixelMatrix(Path.Combine(trainDir, "52.png"));
 
             //List<double> imageSignal = ImageHelper.ConvertImageToFunctionSignal(Path.Combine(docPath, "5_1.png"));
 
-            //ImageHelper.WritePixelMatrixToCSVFile(imageMatrix, Path.Combine(docPath, "5_1.csv"));            
+            ImageHelper.WritePixelMatrixToCSVFile(imageMatrix, Path.Combine(docPath, "52.csv"));            
 
             #region Инициализируем скрытые слои
 
