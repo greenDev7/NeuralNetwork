@@ -76,10 +76,26 @@ namespace NeuralNetwork
         {
             // Передаем сигнал по скрытым слоям
             foreach (Layer hiddenLayer in HiddenLayers)
-                functionSignal = hiddenLayer.ProduceSignals(functionSignal);
+                functionSignal = SetInputSignalAndReturnOutputSignal(hiddenLayer, functionSignal);
 
             // Возвращаем сигнал от выходного слоя
-            return OutputLayer.ProduceSignals(functionSignal);
+            return SetInputSignalAndReturnOutputSignal(OutputLayer, functionSignal);
+        }
+
+        /// <summary>
+        /// Присваивает слою входной сигнал, инициализирует локальные индуцированные поля нейронов и возвращает выходной сигнал
+        /// </summary>
+        /// <param name="layer">слой</param>
+        /// <param name="functionSignal">входной сигнал</param>
+        /// <returns>выходной сигнал</returns>
+        private List<double> SetInputSignalAndReturnOutputSignal(Layer layer, List<double> functionSignal)
+        {
+            layer.InputSignals = functionSignal;
+
+            foreach (Neuron neuron in layer.Neurons)
+                neuron.SetInducedLocalField(functionSignal);
+
+            return layer.ProduceSignals();
         }
 
         /// <summary>
@@ -171,13 +187,13 @@ namespace NeuralNetwork
                 double currentErrorEnergy = GetCurrentErrorEnergy(errorSignal);
                 totalNetworkErrorEnergySum += currentErrorEnergy;
 
-                PropagateBackward(errorSignal);
+                MakePropagateBackward(errorSignal);
             }
 
             return totalNetworkErrorEnergySum / trainingSet.Count;
         }
 
-        private void PropagateBackward(List<double> errorSignal)
+        private void MakePropagateBackward(List<double> errorSignal)
         {
             throw new NotImplementedException();
         }
