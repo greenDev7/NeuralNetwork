@@ -5,44 +5,40 @@ namespace NeuralNetwork
 {
     public class Neuron
     {
-        /// <summary>
-        /// Массив весовых коэффициентов (синаптические веса)
-        /// </summary>
         public List<double> Weights { get; }
-        /// <summary>
-        /// Пороговый элемент (стр. 43)
-        /// </summary>
         public double Bias { get; }
-        /// <summary>
-        /// Функция активации
-        /// </summary>
         private Func<double, double> ActivationFunction { get; }
-
+        public double? InducedLocalField { get; private set; }
+        public double LocalGradient { get; }
 
         public Neuron(Func<double, double> ActivationFunction, List<double> Weights = null, double Bias = 0.0)
         {
+            this.ActivationFunction = ActivationFunction;            
             this.Weights = Weights;
-            this.ActivationFunction = ActivationFunction;
             this.Bias = Bias;
-        }
-
-        private double Adder(List<double> inputSignal)
+            this.InducedLocalField = null;
+        }        
+        
+        public void SetInducedLocalField(List<double> inputSignal)
         {
             if (inputSignal.Count != Weights.Count)
                 throw new ArgumentOutOfRangeException("inputSignals", "Количество входных сигналов не равно количеству весовых коэффициентов");
 
-            double linearCombinerOutput = 0.0;           
+            InducedLocalField = 0.0;
 
             for (int i = 0; i < inputSignal.Count; i++)
-                linearCombinerOutput += inputSignal[i] * Weights[i];
+                InducedLocalField += inputSignal[i] * Weights[i];
 
-            return linearCombinerOutput;
+            InducedLocalField += Bias;
         }
 
-        public double GetActivationPotential(List<double> inputSignal)
+        public double GetActivationPotential()
         {
-            double linearCombinerOutput = Adder(inputSignal);
-            return ActivationFunction(linearCombinerOutput + Bias);
+            if (InducedLocalField == null)
+                throw new ArgumentNullException("InducedLocalField", "В функцию активации передан аргумент равный null");
+            else
+                return ActivationFunction((double)InducedLocalField);
         }
+        
     }
 }
