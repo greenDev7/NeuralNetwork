@@ -6,17 +6,19 @@ namespace NeuralNetwork
     {
         public List<Neuron> Neurons { get; }
 
+        public List<double> InputSignals { get; set; }
+
         public Layer(List<Neuron> Neurons)
         {
             this.Neurons = Neurons;            
         }
 
-        internal List<double> ProduceSignals(List<double> previousLayerSignals)
+        internal List<double> ProduceSignals()
         {
             List<double> currentSignals = new List<double>();
 
             foreach (Neuron neuron in Neurons)
-                currentSignals.Add(neuron.GetActivationPotential(previousLayerSignals));
+                currentSignals.Add(neuron.GetActivationPotential());
        
             return currentSignals;
         }
