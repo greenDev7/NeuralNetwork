@@ -150,7 +150,7 @@ namespace NeuralNetwork
 
             return weights;
         }
-
+     
         public void WriteHiddenWeightsToCSVFile(string fileName)
         {
             TextWriter textWriter = new StreamWriter(fileName);
@@ -174,14 +174,19 @@ namespace NeuralNetwork
             textWriter.Close();
         }
 
-        public double Train(List<List<double>> trainingSet)
+        public double Train(string trainingDirectory)
         {
+            List<(int, string)> randomTrainingSet = ImageHelper.GetRandomImagesPaths(trainingDirectory);
+
             double totalNetworkErrorEnergySum = 0.0;
 
-            foreach (List<double> functionSignal in trainingSet)
+            foreach ((int, string) image in randomTrainingSet)
             {
-                List<double> desiredResponse = GetDesiredResponse(functionSignal);
+                List<double> functionSignal = ImageHelper.ConvertImageToFunctionSignal(image.Item2);
+                List<double> desiredResponse = GetDesiredResponse(image.Item1);
+
                 List<double> outputSignal = PropagateForward(functionSignal);
+
                 List<double> errorSignal = GetErrorSignal(desiredResponse, outputSignal);
 
                 double currentErrorEnergy = GetCurrentErrorEnergy(errorSignal);
@@ -190,7 +195,7 @@ namespace NeuralNetwork
                 MakePropagateBackward(errorSignal);
             }
 
-            return totalNetworkErrorEnergySum / trainingSet.Count;
+            return totalNetworkErrorEnergySum / randomTrainingSet.Count;
         }
 
         private void MakePropagateBackward(List<double> errorSignal)
@@ -218,9 +223,18 @@ namespace NeuralNetwork
             return 0.5 * sum;
         }
 
-        private List<double> GetDesiredResponse(List<double> inputSignal)
+        /// <summary>
+        /// Возвращает желаемый отклик нейросети
+        /// </summary>
+        /// <param name="digit">цифра</param>
+        /// <returns>желаемый отклик</returns>
+        private List<double> GetDesiredResponse(int digit)
         {
-            throw new NotImplementedException();
+            List<double> desiredResponse = new List<double>() { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+
+            desiredResponse[digit] = 1.0;
+
+            return desiredResponse;
         }
     }
 }
