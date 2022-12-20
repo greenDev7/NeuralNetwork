@@ -72,7 +72,7 @@ namespace NeuralNetwork
             #endregion
         }
 
-        public List<double> PropagateForward(List<double> functionSignal)
+        public List<double> MakePropagateForward(List<double> functionSignal)
         {
             // Передаем сигнал по скрытым слоям
             foreach (Layer hiddenLayer in HiddenLayers)
@@ -81,7 +81,6 @@ namespace NeuralNetwork
             // Возвращаем сигнал от выходного слоя
             return SetInputSignalAndReturnOutputSignal(OutputLayer, functionSignal);
         }
-
         /// <summary>
         /// Присваивает слою входной сигнал, инициализирует локальные индуцированные поля нейронов и возвращает выходной сигнал
         /// </summary>
@@ -97,7 +96,6 @@ namespace NeuralNetwork
 
             return layer.ProduceSignals();
         }
-
         /// <summary>
         /// Возвращает список нейронов, инициализированных весовыми коэффициентами
         /// </summary>
@@ -120,7 +118,6 @@ namespace NeuralNetwork
 
             return neurons;
         }
-
         /// <summary>
         /// Возвращает случайное число в заданном интервале 
         /// </summary>
@@ -132,7 +129,6 @@ namespace NeuralNetwork
         {
             return random.NextDouble() * (maxValue - minValue) + minValue;
         }
-
         /// <summary>
         /// Возвращает список весовых коэффициентов инициализированных случайными значениями
         /// </summary>
@@ -149,8 +145,7 @@ namespace NeuralNetwork
                 weights.Add(CreateRandomValue(random, minValue, maxValue));
 
             return weights;
-        }
-     
+        }     
         public void WriteHiddenWeightsToCSVFile(string fileName)
         {
             TextWriter textWriter = new StreamWriter(fileName);
@@ -163,7 +158,6 @@ namespace NeuralNetwork
 
             textWriter.Close();
         }
-
         public void WriteOutputWeightsToCSVFile(string fileName)
         {
             TextWriter textWriter = new StreamWriter(fileName);
@@ -173,36 +167,43 @@ namespace NeuralNetwork
 
             textWriter.Close();
         }
-
-        public double Train(string trainingDirectory)
+        public List<double> Train(string trainingDirectory, out double totalErrorEnergy)
         {
             List<(int, string)> randomTrainingSet = ImageHelper.GetRandomImagesPaths(trainingDirectory);
 
             double totalNetworkErrorEnergySum = 0.0;
+
+            List<double> currentErrorList = new List<double>();
 
             foreach ((int, string) image in randomTrainingSet)
             {
                 List<double> functionSignal = ImageHelper.ConvertImageToFunctionSignal(image.Item2);
                 List<double> desiredResponse = GetDesiredResponse(image.Item1);
 
-                List<double> outputSignal = PropagateForward(functionSignal);
+                List<double> outputSignal = MakePropagateForward(functionSignal);
 
                 List<double> errorSignal = GetErrorSignal(desiredResponse, outputSignal);
-
                 double currentErrorEnergy = GetCurrentErrorEnergy(errorSignal);
+                currentErrorList.Add(currentErrorEnergy);
                 totalNetworkErrorEnergySum += currentErrorEnergy;
 
                 MakePropagateBackward(errorSignal);
             }
 
-            return totalNetworkErrorEnergySum / randomTrainingSet.Count;
-        }
+            totalErrorEnergy = totalNetworkErrorEnergySum / randomTrainingSet.Count;
 
+            return currentErrorList;
+        }
         private void MakePropagateBackward(List<double> errorSignal)
         {
             throw new NotImplementedException();
         }
-
+        /// <summary>
+        /// Возвращает сигнал ошибки сети
+        /// </summary>
+        /// <param name="desiredResponse">желаемый отклик сети</param>
+        /// <param name="outputSignal">действительный отклик сети (функциональный сигнал, генерируемый на выходе работы сети)</param>
+        /// <returns></returns>
         private List<double> GetErrorSignal(List<double> desiredResponse, List<double> outputSignal)
         {
             List<double> errorSignal = new List<double>();
@@ -212,7 +213,11 @@ namespace NeuralNetwork
 
             return errorSignal;
         }
-
+        /// <summary>
+        /// Возвращает текущую энергию ошибки сети
+        /// </summary>
+        /// <param name="errorSignal">сигнал ошибки сети</param>
+        /// <returns></returns>
         private double GetCurrentErrorEnergy(List<double> errorSignal)
         {
             double sum = 0.0;
@@ -222,12 +227,11 @@ namespace NeuralNetwork
 
             return 0.5 * sum;
         }
-
         /// <summary>
         /// Возвращает желаемый отклик нейросети
         /// </summary>
         /// <param name="digit">цифра</param>
-        /// <returns>желаемый отклик</returns>
+        /// <returns></returns>
         private List<double> GetDesiredResponse(int digit)
         {
             List<double> desiredResponse = new List<double>() { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
