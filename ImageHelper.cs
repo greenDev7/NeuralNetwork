@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 
 namespace NeuralNetwork
 {
@@ -24,7 +26,6 @@ namespace NeuralNetwork
 
             return functionSignal;
         }
-
         public static List<List<double>> ConvertImageToPixelMatrix(string fileName)
         {
             Bitmap img = new Bitmap(fileName);
@@ -49,7 +50,6 @@ namespace NeuralNetwork
 
             return pixelMatrix;
         }
-
         public static void WritePixelMatrixToCSVFile(List<List<double>> pixelMatrix, string fileName)
         {
             using (StreamWriter streamWriter = new StreamWriter(fileName))
@@ -57,6 +57,23 @@ namespace NeuralNetwork
                 foreach (List<double> pixelLine in pixelMatrix)
                     streamWriter.WriteLine(string.Join(";", pixelLine));
             }
+        }
+        public static List<(int, string)> GetRandomImagesPaths(string path)
+        {
+            List<(int, string)> imagesPaths = new List<(int, string)>();
+
+            string[] catalogsWithDigits = Directory.GetDirectories(path);
+
+            for (int i = 0; i < catalogsWithDigits.Length; i++)
+            {
+                string[] images = Directory.GetFiles(catalogsWithDigits[i]);
+
+                for (int j = 0; j < images.Length; j++)
+                    imagesPaths.Add((i, images[j]));
+            }
+
+            Random rnd = new Random();
+            return imagesPaths.OrderBy(x => rnd.Next()).ToList();
         }
     }
 }
