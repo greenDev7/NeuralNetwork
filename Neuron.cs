@@ -9,7 +9,7 @@ namespace NeuralNetwork
         public double Bias { get; }
         private Func<double, double> ActivationFunction { get; }
         public double? InducedLocalField { get; private set; }
-        public double LocalGradient { get; }
+        public double LocalGradient { get; private set; }
 
         public Neuron(Func<double, double> ActivationFunction, List<double> Weights = null, double Bias = 0.0)
         {
@@ -22,7 +22,7 @@ namespace NeuralNetwork
         public void SetInducedLocalField(List<double> inputSignal)
         {
             if (inputSignal.Count != Weights.Count)
-                throw new ArgumentOutOfRangeException("inputSignals", "Количество входных сигналов не равно количеству весовых коэффициентов");
+                throw new ArgumentOutOfRangeException("inputSignals", "Ошибка при вычислении индуцированного локального поля: количество входных сигналов не равно количеству весовых коэффициентов");
 
             InducedLocalField = 0.0;
 
@@ -30,6 +30,14 @@ namespace NeuralNetwork
                 InducedLocalField += inputSignal[i] * Weights[i];
 
             InducedLocalField += Bias;
+        }
+
+        internal void SetLocalGradient(double localGradient) => LocalGradient = localGradient;
+
+        internal void AdjustWeights(double learningRateParameter, List<double> inputSignals)
+        {
+            for (int i = 0; i < Weights.Count; i++)
+                Weights[i] += learningRateParameter * LocalGradient * inputSignals[i];
         }
 
         public double GetActivationPotential()
