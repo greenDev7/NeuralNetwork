@@ -46,7 +46,6 @@ namespace NeuralNetwork
                 throw new ArgumentNullException("InducedLocalField", "В функцию активации передан аргумент равный null");
             else
                 return ActivationFunction((double)InducedLocalField);
-        }
-        
+        }        
     }
 }

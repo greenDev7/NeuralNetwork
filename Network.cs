@@ -31,14 +31,14 @@ namespace NeuralNetwork
         /// <param name="hiddenActivationFunctions">массив функций активаций нейронов скрытых слоев</param>
         public Network(int inputLayerDimension, int outputLayerNeuronsCount, Func<double, double> outputActivationFunction, int[] hiddenLayersDimensions = null, Func<double, double>[] hiddenActivationFunctions = null)
         {
-            if (hiddenLayersDimensions.Length != hiddenActivationFunctions.Length)
-                throw new Exception("Количество скрытых слоев не равно количеству функций активации для скрытых слоев");
-
             Random random = new Random();
 
             // Если есть скрытые слои
             if (hiddenLayersDimensions != null)
             {
+                if (hiddenLayersDimensions.Length != hiddenActivationFunctions.Length)
+                    throw new Exception("Количество скрытых слоев не равно количеству функций активации для скрытых слоев");
+
                 #region Инициализируем весовые коэффициенты на скрытых слоях
 
                 HiddenLayers = new List<Layer>();
@@ -74,9 +74,10 @@ namespace NeuralNetwork
 
         public List<double> MakePropagateForward(List<double> functionSignal)
         {
-            // Передаем сигнал по скрытым слоям
-            foreach (Layer hiddenLayer in HiddenLayers)
-                functionSignal = SetInputSignalAndReturnOutputSignal(hiddenLayer, functionSignal);
+            // Если имеются скрытые слои, то передаем сигнал по скрытым слоям
+            if (HiddenLayers != null)
+                foreach (Layer hiddenLayer in HiddenLayers)
+                    functionSignal = SetInputSignalAndReturnOutputSignal(hiddenLayer, functionSignal);
 
             // Возвращаем сигнал от выходного слоя
             return SetInputSignalAndReturnOutputSignal(OutputLayer, functionSignal);
@@ -199,6 +200,10 @@ namespace NeuralNetwork
         {
             OutputLayer.CalculateAndSetLocalGradients(errorSignal);
             OutputLayer.AdjustWeights(learningRateParameter);
+
+            // Если скрытых слоев нет, то выходим из метода
+            if (HiddenLayers == null)
+                return;
 
             Layer previousLayer = OutputLayer;
 
