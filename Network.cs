@@ -167,7 +167,7 @@ namespace NeuralNetwork
 
             textWriter.Close();
         }
-        public List<double> Train(string trainingDirectory, out double totalErrorEnergy)
+        public List<double> Train(string trainingDirectory, out double totalErrorEnergy, double learningRateParameter)
         {
             List<(int, string)> randomTrainingSet = ImageHelper.GetRandomImagesPaths(trainingDirectory);
 
@@ -187,17 +187,29 @@ namespace NeuralNetwork
                 currentErrorList.Add(currentErrorEnergy);
                 totalNetworkErrorEnergySum += currentErrorEnergy;
 
-                MakePropagateBackward(errorSignal);
+                MakePropagateBackward(errorSignal, learningRateParameter);
             }
 
             totalErrorEnergy = totalNetworkErrorEnergySum / randomTrainingSet.Count;
 
             return currentErrorList;
         }
-        private void MakePropagateBackward(List<double> errorSignal)
+
+        private void MakePropagateBackward(List<double> errorSignal, double learningRateParameter)
         {
-            throw new NotImplementedException();
+            OutputLayer.CalculateAndSetLocalGradients(errorSignal);
+            OutputLayer.AdjustWeights(learningRateParameter);
+
+            Layer previousLayer = OutputLayer;
+
+            for (int i = HiddenLayers.Count - 1; i >= 0; i--)
+            {
+                HiddenLayers[i].CalculateAndSetLocalGradients(previousLayer);
+                HiddenLayers[i].AdjustWeights(learningRateParameter);
+                previousLayer = HiddenLayers[i];
+            }           
         }
+
         /// <summary>
         /// Возвращает сигнал ошибки сети
         /// </summary>
@@ -230,7 +242,7 @@ namespace NeuralNetwork
         /// <summary>
         /// Возвращает желаемый отклик нейросети
         /// </summary>
-        /// <param name="digit">цифра</param>
+        /// <param name="digit">цифра (от 0 до 9)</param>
         /// <returns></returns>
         private List<double> GetDesiredResponse(int digit)
         {
