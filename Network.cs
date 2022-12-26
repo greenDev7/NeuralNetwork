@@ -196,6 +196,31 @@ namespace NeuralNetwork
             return currentErrorList;
         }
 
+        public List<double> TestTrain(out double totalErrorEnergy, double learningRateParameter)
+        {
+            TestTrain test = new TestTrain();
+
+            double totalNetworkErrorEnergySum = 0.0;
+
+            List<double> currentErrorList = new List<double>();
+
+            foreach ((List<double>, List<double>) ex in test.TrainingSet)
+            {
+                List<double> outputSignal = MakePropagateForward(ex.Item1);
+
+                List<double> errorSignal = GetErrorSignal(ex.Item2, outputSignal);
+                double currentErrorEnergy = GetCurrentErrorEnergy(errorSignal);
+                currentErrorList.Add(currentErrorEnergy);
+                totalNetworkErrorEnergySum += currentErrorEnergy;
+
+                MakePropagateBackward(errorSignal, learningRateParameter);
+            }
+
+            totalErrorEnergy = totalNetworkErrorEnergySum / test.TrainingSet.Count;
+
+            return currentErrorList;
+        }
+
         private void MakePropagateBackward(List<double> errorSignal, double learningRateParameter)
         {
             OutputLayer.CalculateAndSetLocalGradients(errorSignal);
