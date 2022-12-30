@@ -26,7 +26,7 @@ namespace NeuralNetwork
         internal void CalculateAndSetLocalGradients(List<double> errorSignal)
         {
             for (int i = 0; i < Neurons.Count; i++)
-                Neurons[i].SetLocalGradient(errorSignal[i] * ActivationFunctions.LogisticFunctionsDerivative((double)Neurons[i].InducedLocalField));
+                Neurons[i].SetLocalGradient(errorSignal[i] * ActivationFunctions.SigmoidFunctionsDerivative((double)Neurons[i].InducedLocalField));
         }
         
         internal void CalculateAndSetLocalGradients(Layer previousLayer)
@@ -38,7 +38,7 @@ namespace NeuralNetwork
 
                 double innerSum = GetInnerSum(associatedWeights, previousLayer);
 
-                Neurons[i].SetLocalGradient(innerSum * ActivationFunctions.LogisticFunctionsDerivative((double)Neurons[i].InducedLocalField));
+                Neurons[i].SetLocalGradient(innerSum * ActivationFunctions.SigmoidFunctionsDerivative((double)Neurons[i].InducedLocalField));
             }
         }
 

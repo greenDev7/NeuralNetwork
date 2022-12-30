@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Windows.Forms;
-using MNIST.IO;
 
 namespace NeuralNetwork
 {
@@ -44,7 +41,7 @@ namespace NeuralNetwork
             //    List<Neuron> neurons = new List<Neuron>();
 
             //    foreach (var weights in layer)
-            //        neurons.Add(new Neuron(ActivationFunctions.LogisticFunction, Weights: weights.Skip(1).ToList(), Bias: weights[0]));
+            //        neurons.Add(new Neuron(ActivationFunctions.SigmoidFunction, Weights: weights.Skip(1).ToList(), Bias: weights[0]));
 
             //    hiddenLayers.Add(new Layer(neurons));
             //}
@@ -59,7 +56,7 @@ namespace NeuralNetwork
             //// Формируем выходной слой
             //List<Neuron> outputNeurons = new List<Neuron>();
             //for (int i = 0; i < outputLayerWeights.Count; i++)
-            //    outputNeurons.Add(new Neuron(ActivationFunctions.LogisticFunction, Weights: outputLayerWeights[i].Skip(1).ToList(), Bias: outputLayerWeights[i][0]));
+            //    outputNeurons.Add(new Neuron(ActivationFunctions.SigmoidFunction, Weights: outputLayerWeights[i].Skip(1).ToList(), Bias: outputLayerWeights[i][0]));
 
             //Layer outputLayer = new Layer(outputNeurons);
             #endregion
@@ -73,14 +70,13 @@ namespace NeuralNetwork
             int[] hiddenLayersDimensions = new int[hiddenLayersCount];
             Func<double, double>[] hiddenActivationFunctions = new Func<double, double>[hiddenLayersCount];
 
-            hiddenLayersDimensions[0] = 300;
-            //hiddenLayersDimensions[1] = 50;
+            hiddenLayersDimensions[0] = 2;
 
-            hiddenActivationFunctions[0] = ActivationFunctions.LogisticFunction;
-            //hiddenActivationFunctions[1] = ActivationFunctions.LogisticFunction;
+            hiddenActivationFunctions[0] = ActivationFunctions.SigmoidFunction;
+            //hiddenActivationFunctions[1] = ActivationFunctions.SigmoidFunction;
 
-            Network network = new Network(900, 10, ActivationFunctions.LogisticFunction, hiddenLayersDimensions, hiddenActivationFunctions);
-            //Network network = new Network(900, 10, ActivationFunctions.LogisticFunction);
+            Network network = new Network(900, 10, ActivationFunctions.SigmoidFunction, hiddenLayersDimensions, hiddenActivationFunctions);
+            //Network network = new Network(900, 10, ActivationFunctions.SigmoidFunction);
 
             double totalError;
             List<double> errorList = network.Train(trainingDirectory, out totalError, 0.1, 2);
