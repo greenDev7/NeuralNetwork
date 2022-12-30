@@ -27,6 +27,16 @@ namespace NeuralNetwork
 
             return functionSignal;
         }
+        public static List<double> ConvertImageToFunctionSignal(byte[,] image)
+        {
+            List<double> functionSignal = new List<double>();
+
+            for (int i = 0; i < image.GetLength(0); i++)
+                for (int j = 0; j < image.GetLength(1); j++)
+                    functionSignal.Add(image[i, j] == 0 ? 0.0 : 1.0);
+
+            return functionSignal;
+        }
         public static List<List<double>> ConvertImageToPixelMatrix(string fileName)
         {
             Bitmap img = new Bitmap(fileName);
