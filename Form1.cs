@@ -1,6 +1,9 @@
-﻿using System;
+﻿using MNIST.IO;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace NeuralNetwork
@@ -14,112 +17,102 @@ namespace NeuralNetwork
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string myDocumentFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-            string trainingDirectory = "";
-            string testDirectory = "";
+            string trainingImagesPath = Path.Combine(myDocumentFolder, "train-images-idx3-ubyte");
+            string trainingLabelsPath = Path.Combine(myDocumentFolder, "train-labels-idx1-ubyte");
 
-            string trainingImagesPath = Path.Combine(docPath, "train-images-idx3-ubyte");
-            string trainingLabelsPath = Path.Combine(docPath, "train-labels-idx1-ubyte");
+            string testImagesPath = Path.Combine(myDocumentFolder, "t10k-images-idx3-ubyte");
+            string testLabelsPath = Path.Combine(myDocumentFolder, "t10k-labels-idx1-ubyte");
 
-            string testImagesPath = Path.Combine(docPath, "t10k-images-idx3-ubyte");
-            string testLabelsPath = Path.Combine(docPath, "t10k-labels-idx1-ubyte");
+            List<Layer> hiddenLayers = InitializeHiddenLayersWeightsFromCSVFile(Path.Combine(myDocumentFolder, "adjustedHiddenLayerWeights_acc9153.csv"));
+            Layer outputLayer = InitializeOutputLayerWeightsFromCSVFile(Path.Combine(myDocumentFolder, "adjustedOutputLayerWeights_acc9153.csv"));
 
-            ImageHelper.CreateImagesFromMnistFile(Path.Combine(docPath, "ImagesTest"), testImagesPath, testLabelsPath); 
+            Network network = new Network(hiddenLayers, outputLayer);
 
-            #region Инициализируем скрытые слои
+            #region Блок для инициализация нейросети рандомными значениями и ее обучение
 
-            //// Читаем весовые коэффициенты из файла
-            //List<List<List<double>>> hiddenLayersWeights =
-            //    WeightsReader.ReadHiddenLayersWeightsFromCSVFile(Path.Combine(docPath, "hiddenLayersTest.csv"));
+            ////Инициализируем нейросеть с помощью заданных параметров
 
-            //// Формируем скрытые слои
-            ///// TODO: Можно добавить массив с функциями активаций, чтобы каждый скрытый слой имел свою функцию активации 
-            //List<Layer> hiddenLayers = new List<Layer>();
-            //foreach (var layer in hiddenLayersWeights)
-            //{
-            //    List<Neuron> neurons = new List<Neuron>();
+            //int hiddenLayersCount = 1;
+            //int[] hiddenLayersDimensions = new int[hiddenLayersCount];
+            //Func<double, double>[] hiddenActivationFunctions = new Func<double, double>[hiddenLayersCount];
 
-            //    foreach (var weights in layer)
-            //        neurons.Add(new Neuron(ActivationFunctions.SigmoidFunction, Weights: weights.Skip(1).ToList(), Bias: weights[0]));
+            //hiddenLayersDimensions[0] = 40;
+            //hiddenActivationFunctions[0] = ActivationFunctions.SigmoidFunction;
 
-            //    hiddenLayers.Add(new Layer(neurons));
-            //}
+            //Network network = new Network(784, 10, ActivationFunctions.SigmoidFunction, hiddenLayersDimensions, hiddenActivationFunctions);
+            //List<double> errorList = network.Train(trainingImagesPath, trainingLabelsPath, 0.2, 1);
 
             #endregion
 
-            #region Инициализируем выходной слой
+            IEnumerable<TestCase> testCases = FileReaderMNIST.LoadImagesAndLables(testLabelsPath, testImagesPath);
 
-            //// Читаем весовые коэффициенты из файла
-            //List<List<double>> outputLayerWeights = WeightsReader.ReadOutputLayerWeightsFromCSVFile(Path.Combine(docPath, "outputWeightsTest.csv"));
-
-            //// Формируем выходной слой
-            //List<Neuron> outputNeurons = new List<Neuron>();
-            //for (int i = 0; i < outputLayerWeights.Count; i++)
-            //    outputNeurons.Add(new Neuron(ActivationFunctions.SigmoidFunction, Weights: outputLayerWeights[i].Skip(1).ToList(), Bias: outputLayerWeights[i][0]));
-
-            //Layer outputLayer = new Layer(outputNeurons);
-            #endregion
-
-            // Инициализируем нейросеть с помощью слоев (скрытых и выходного)
-            // Network network = new Network(hiddenLayers, outputLayer);
-
-            // Инициализируем нейросеть с помощью заданных параметров
-
-            int hiddenLayersCount = 1;
-            int[] hiddenLayersDimensions = new int[hiddenLayersCount];
-            Func<double, double>[] hiddenActivationFunctions = new Func<double, double>[hiddenLayersCount];
-
-            hiddenLayersDimensions[0] = 2;
-
-            hiddenActivationFunctions[0] = ActivationFunctions.SigmoidFunction;
-            //hiddenActivationFunctions[1] = ActivationFunctions.SigmoidFunction;
-
-            Network network = new Network(900, 10, ActivationFunctions.SigmoidFunction, hiddenLayersDimensions, hiddenActivationFunctions);
-            //Network network = new Network(900, 10, ActivationFunctions.SigmoidFunction);
-
-            double totalError;
-            List<double> errorList = network.Train(trainingDirectory, out totalError, 0.1, 2);
-            //List<double> errorList = network.TestTrain(out totalError, 0.5);
-
-
-
-            WriteErrorListToCSVFile(errorList, Path.Combine(docPath, "errorList.csv"));
-
-
-            List<(int, string)> randomTestSet = ImageHelper.GetRandomImagesPaths(testDirectory);
-
-            foreach ((int, string) image in randomTestSet)
+            int incorrectPredictionsCount = 0;
+            foreach (TestCase test in testCases)
             {
-                List<double> functionSignal = ImageHelper.ConvertImageToFunctionSignal(image.Item2);
+                List<double> functionSignal = ImageHelper.ConvertImageToFunctionSignal(test.Image);
 
                 List<double> outputSignal = network.MakePropagateForward(functionSignal);
+
+                int predictedDigit = outputSignal.IndexOf(outputSignal.Max());
+
+                if (test.Label != predictedDigit)
+                {
+                    incorrectPredictionsCount++;
+                    Bitmap bitmap = ImageHelper.CreateBitmapFromMnistImage(test.Image);
+                    bitmap.Save(Path.Combine(myDocumentFolder, "IncorrectPredictions", $"{incorrectPredictionsCount}_{test.Label}_{predictedDigit}.png"));
+                }
             }
 
+            double accuracy = 100.0 - (incorrectPredictionsCount / 100.0);
 
-            //List<double> inputSignal1 = new List<double>() { 0.0, 0.0 };
-            //List<double> inputSignal2 = new List<double>() { 0.0, 1.0 };
-            //List<double> inputSignal3 = new List<double>() { 1.0, 0.0 };
-            //List<double> inputSignal4 = new List<double>() { 1.0, 1.0 };
-
-            //List<double> outputSignal1 = network.MakePropagateForward(inputSignal1);
-            //List<double> outputSignal2 = network.MakePropagateForward(inputSignal2);
-            //List<double> outputSignal3 = network.MakePropagateForward(inputSignal3);
-            //List<double> outputSignal4 = network.MakePropagateForward(inputSignal4);
-
-            // Записываем весовые коэффициенты в файлы
-            //network.WriteHiddenWeightsToCSVFile(Path.Combine(docPath, "hiddenLayer_res2.csv"));
-            //network.WriteOutputWeightsToCSVFile(Path.Combine(docPath, "outputWeights_res2.csv"));
+            // Записываем оптимизированные весовые коэффициенты в файлы
+            //network.WriteHiddenWeightsToCSVFile(Path.Combine(myDocumentFolder, "adjustedHiddenLayerWeights_accXX.csv"));
+            //network.WriteOutputWeightsToCSVFile(Path.Combine(myDocumentFolder, "adjustedOutputLayerWeights_accXX.csv"));
         }
 
-        private void WriteErrorListToCSVFile(List<double> errorList, string fileName)
+        /// <summary>
+        /// Формирует выходной слой и инициализирует его весовые коэффициенты из CSV-файла
+        /// </summary>
+        /// <param name="fileName">путь к файлу с весовыми коэффициентами для выходного слоя</param>
+        /// <returns>Выходной слой</returns>
+        private Layer InitializeOutputLayerWeightsFromCSVFile(string fileName)
         {
-            TextWriter textWriter = new StreamWriter(fileName);
+            List<List<double>> outputLayerWeights = WeightsReader.ReadOutputLayerWeightsFromCSVFile(fileName);
 
-            for (int i = 0; i < errorList.Count; i++)
-                textWriter.WriteLine("{0};{1}", i, errorList[i]);          
+            // Формируем выходной слой
+            List<Neuron> outputNeurons = new List<Neuron>();
+            for (int i = 0; i < outputLayerWeights.Count; i++)
+                outputNeurons.Add(new Neuron(ActivationFunctions.SigmoidFunction, Weights: outputLayerWeights[i].Skip(1).ToList(), Bias: outputLayerWeights[i][0]));
 
-            textWriter.Close();
+            return new Layer(outputNeurons);
         }
+
+        /// <summary>
+        /// Формирует скрытые слои и инициализирует их весовые коэффициенты из CSV-файла
+        /// </summary>
+        /// <param name="fileName">путь к файлу с весовыми коэффициентами для скрытых слоев</param>
+        /// <returns>Список скрытых слоев</returns>
+        private List<Layer> InitializeHiddenLayersWeightsFromCSVFile(string fileName)
+        {
+            // Читаем весовые коэффициенты из файла
+            List<List<List<double>>> hiddenLayersWeights = WeightsReader.ReadHiddenLayersWeightsFromCSVFile(fileName);
+
+            // Формируем скрытые слои
+            List<Layer> hiddenLayers = new List<Layer>();
+
+            foreach (var layer in hiddenLayersWeights)
+            {
+                List<Neuron> neurons = new List<Neuron>();
+
+                foreach (var weights in layer)
+                    neurons.Add(new Neuron(ActivationFunctions.SigmoidFunction, Weights: weights.Skip(1).ToList(), Bias: weights[0]));
+
+                hiddenLayers.Add(new Layer(neurons));
+            }
+
+            return hiddenLayers;
+        }        
     }
 }
