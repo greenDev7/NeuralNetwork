@@ -149,6 +149,9 @@ namespace NeuralNetwork
         }     
         public void WriteHiddenWeightsToCSVFile(string fileName)
         {
+            if (HiddenLayers == null)
+                return;
+
             TextWriter textWriter = new StreamWriter(fileName);
 
             textWriter.WriteLine(string.Format("{0};{1}", "hiddenLayersDimensions", string.Join(";", HiddenLayers.Select(x => x.Neurons.Count))));
@@ -168,30 +171,33 @@ namespace NeuralNetwork
 
             textWriter.Close();
         }
-        public List<double> Train(string trainingDirectory, out double totalErrorEnergy, double learningRateParameter)
+        public List<double> Train(string trainingDirectory, out double totalErrorEnergy, double learningRateParameter, int numberOfEpochs)
         {
-            List<(int, string)> randomTrainingSet = ImageHelper.GetRandomImagesPaths(trainingDirectory);
-
             double totalNetworkErrorEnergySum = 0.0;
-
             List<double> currentErrorList = new List<double>();
 
-            foreach ((int, string) image in randomTrainingSet)
+            for (int e = 0; e < numberOfEpochs; e++)
             {
-                List<double> functionSignal = ImageHelper.ConvertImageToFunctionSignal(image.Item2);
-                List<double> desiredResponse = GetDesiredResponse(image.Item1);
+                List<(int, string)> randomTrainingSet = ImageHelper.GetRandomImagesPaths(trainingDirectory);                
 
-                List<double> outputSignal = MakePropagateForward(functionSignal);
+                foreach ((int, string) image in randomTrainingSet)
+                {
+                    List<double> functionSignal = ImageHelper.ConvertImageToFunctionSignal(image.Item2);
+                    List<double> desiredResponse = GetDesiredResponse(image.Item1);
 
-                List<double> errorSignal = GetErrorSignal(desiredResponse, outputSignal);
-                double currentErrorEnergy = GetCurrentErrorEnergy(errorSignal);
-                currentErrorList.Add(currentErrorEnergy);
-                totalNetworkErrorEnergySum += currentErrorEnergy;
+                    List<double> outputSignal = MakePropagateForward(functionSignal);
 
-                MakePropagateBackward(errorSignal, learningRateParameter);
+                    List<double> errorSignal = GetErrorSignal(desiredResponse, outputSignal);
+                    double currentErrorEnergy = GetCurrentErrorEnergy(errorSignal);
+                    currentErrorList.Add(currentErrorEnergy);
+                    totalNetworkErrorEnergySum += currentErrorEnergy;
+
+                    MakePropagateBackward(errorSignal, learningRateParameter);
+                }
             }
 
-            totalErrorEnergy = totalNetworkErrorEnergySum / randomTrainingSet.Count;
+
+            totalErrorEnergy = totalNetworkErrorEnergySum / (2000 * numberOfEpochs);
 
             return currentErrorList;
         }

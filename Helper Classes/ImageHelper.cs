@@ -112,7 +112,6 @@ namespace NeuralNetwork
             Random rnd = new Random();
             return imagesPaths.OrderBy(x => rnd.Next()).ToList();
         }
-
         public static void CreateImagesFromMnistFile(string path, string imagesFileName, string labelsFileName)
         {
             Directory.CreateDirectory(path);
