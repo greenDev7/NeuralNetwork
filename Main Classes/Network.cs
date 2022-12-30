@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MNIST.IO;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -29,7 +30,8 @@ namespace NeuralNetwork
         /// <param name="outputActivationFunction">функция активации у нейронов выходного слоя</param>
         /// <param name="hiddenLayersDimensions">размерности скрытых слоев</param>
         /// <param name="hiddenActivationFunctions">массив функций активаций нейронов скрытых слоев</param>
-        public Network(int inputLayerDimension, int outputLayerNeuronsCount, Func<double, double> outputActivationFunction, int[] hiddenLayersDimensions = null, Func<double, double>[] hiddenActivationFunctions = null)
+        public Network(int inputLayerDimension, int outputLayerNeuronsCount, Func<double, double> outputActivationFunction, int[] hiddenLayersDimensions = null, 
+            Func<double, double>[] hiddenActivationFunctions = null, double randomMinValue = 0.0, double randomMaxValue = 1.0)
         {
             Random random = new Random();
 
@@ -46,7 +48,7 @@ namespace NeuralNetwork
                 // Сначала инициализируем первый скрытый слой
 
                 // Количество весовых коэффициентов у каждого нейрона первого скрытого слоя равно количеству нейронов входного слоя
-                HiddenLayers.Add(new Layer(CreateNeurons(hiddenLayersDimensions[0], inputLayerDimension, -1.0, 1.0, hiddenActivationFunctions[0], random)));
+                HiddenLayers.Add(new Layer(CreateNeurons(hiddenLayersDimensions[0], inputLayerDimension, randomMinValue, randomMaxValue, hiddenActivationFunctions[0], random)));
 
                 // Если скрытых слоев больше 1
                 if (hiddenLayersDimensions.Length > 1)
@@ -54,7 +56,7 @@ namespace NeuralNetwork
                     // Количество весовых коэффициентов на втором и последующих скрытых слоях равно количеству нейронов на предыдущем скрытом слое
                     // Еще раз, первый скрытый слой уже проинициализирован, поэтому начинаем со второго (h = 1)
                     for (int h = 1; h < hiddenLayersDimensions.Length; h++)
-                        HiddenLayers.Add(new Layer(CreateNeurons(hiddenLayersDimensions[h], hiddenLayersDimensions[h - 1], -1.0, 1.0, hiddenActivationFunctions[h], random)));
+                        HiddenLayers.Add(new Layer(CreateNeurons(hiddenLayersDimensions[h], hiddenLayersDimensions[h - 1], randomMinValue, randomMaxValue, hiddenActivationFunctions[h], random)));
                 }
 
                 #endregion
@@ -67,7 +69,7 @@ namespace NeuralNetwork
 
             int outputWeightsCount = hiddenLayersDimensions != null ? hiddenLayersDimensions.Last() : inputLayerDimension;
 
-            OutputLayer = new Layer(CreateNeurons(outputLayerNeuronsCount, outputWeightsCount, -1.0, 1.0, outputActivationFunction, random));
+            OutputLayer = new Layer(CreateNeurons(outputLayerNeuronsCount, outputWeightsCount, randomMinValue, randomMaxValue, outputActivationFunction, random));
 
             #endregion
         }
@@ -94,7 +96,7 @@ namespace NeuralNetwork
 
             foreach (Neuron neuron in layer.Neurons)
                 neuron.SetInducedLocalField(functionSignal);
-
+            
             return layer.ProduceSignals();
         }
         /// <summary>
@@ -114,7 +116,7 @@ namespace NeuralNetwork
             for (int i = 0; i < neuronsCount; i++)
             {
                 List<double> weights = CreateRandomWeights(weightsCount, weightsMinValue, weightsMaxValue, random);
-                neurons.Add(new Neuron(activationFunction, weights, CreateRandomValue(random, weightsMinValue, weightsMaxValue)));
+                neurons.Add(new Neuron(activationFunction, weights, CreateRandomValue(random, weightsMinValue, weightsMaxValue, i)));
             }
 
             return neurons;
@@ -126,9 +128,14 @@ namespace NeuralNetwork
         /// <param name="minValue">левая граница интеравала</param>
         /// <param name="maxValue">правая граница интеравала</param>
         /// <returns></returns>
-        private double CreateRandomValue(Random random, double minValue, double maxValue)
+        private double CreateRandomValue(Random random, double minValue, double maxValue, int objectIndex)
         {
-            return random.NextDouble() * (maxValue - minValue) + minValue;
+            double randomDouble = random.NextDouble() * (maxValue - minValue) + minValue;
+
+            if (objectIndex % 2 == 0)
+                return -randomDouble;
+
+            return randomDouble;
         }
         /// <summary>
         /// Возвращает список весовых коэффициентов инициализированных случайными значениями
@@ -143,7 +150,7 @@ namespace NeuralNetwork
             List<double> weights = new List<double>();
 
             for (int i = 0; i < weightsCount; i++)
-                weights.Add(CreateRandomValue(random, minValue, maxValue));
+                weights.Add(CreateRandomValue(random, minValue, maxValue, i));
 
             return weights;
         }     
@@ -171,37 +178,31 @@ namespace NeuralNetwork
 
             textWriter.Close();
         }
-        public List<double> Train(string trainingDirectory, out double totalErrorEnergy, double learningRateParameter, int numberOfEpochs)
+        public List<double> Train(string imagesFileName, string labelsFileName, double learningRateParameter, int numberOfEpochs)
         {
-            double totalNetworkErrorEnergySum = 0.0;
             List<double> currentErrorList = new List<double>();
 
             for (int e = 0; e < numberOfEpochs; e++)
             {
-                List<(int, string)> randomTrainingSet = ImageHelper.GetRandomImagesPaths(trainingDirectory);                
+                IEnumerable<TestCase> testCases = FileReaderMNIST.LoadImagesAndLables(labelsFileName, imagesFileName);
 
-                foreach ((int, string) image in randomTrainingSet)
+                foreach (TestCase test in testCases)
                 {
-                    List<double> functionSignal = ImageHelper.ConvertImageToFunctionSignal(image.Item2);
-                    List<double> desiredResponse = GetDesiredResponse(image.Item1);
+                    List<double> functionSignal = ImageHelper.ConvertImageToFunctionSignal(test.Image);
+                    List<double> desiredResponse = GetDesiredResponse(test.Label);
 
                     List<double> outputSignal = MakePropagateForward(functionSignal);
 
                     List<double> errorSignal = GetErrorSignal(desiredResponse, outputSignal);
                     double currentErrorEnergy = GetCurrentErrorEnergy(errorSignal);
                     currentErrorList.Add(currentErrorEnergy);
-                    totalNetworkErrorEnergySum += currentErrorEnergy;
 
                     MakePropagateBackward(errorSignal, learningRateParameter);
                 }
             }
 
-
-            totalErrorEnergy = totalNetworkErrorEnergySum / (2000 * numberOfEpochs);
-
             return currentErrorList;
         }
-
         public List<double> TestTrain(out double totalErrorEnergy, double learningRateParameter)
         {
             TestTrain test = new TestTrain();
@@ -226,7 +227,6 @@ namespace NeuralNetwork
 
             return currentErrorList;
         }
-
         private void MakePropagateBackward(List<double> errorSignal, double learningRateParameter)
         {
             OutputLayer.CalculateAndSetLocalGradients(errorSignal);
@@ -245,7 +245,6 @@ namespace NeuralNetwork
                 previousLayer = HiddenLayers[i];
             }           
         }
-
         /// <summary>
         /// Возвращает сигнал ошибки сети
         /// </summary>
