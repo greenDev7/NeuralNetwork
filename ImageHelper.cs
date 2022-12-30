@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MNIST.IO;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -50,6 +51,24 @@ namespace NeuralNetwork
 
             return pixelMatrix;
         }
+        public static List<List<int>> ConvertBytesToPixelMatrix(byte[,] image)
+        {
+            List<List<int>> pixelMatrix = new List<List<int>>();
+
+            for (int i = 0; i < image.GetLength(0); i++)
+            {
+                List<int> pixelLine = new List<int>();
+
+                for (int j = 0; j < image.GetLength(1); j++)
+                {
+                    pixelLine.Add(image[i, j]);
+                }
+
+                pixelMatrix.Add(pixelLine);
+            }
+
+            return pixelMatrix;
+        }
         public static void WritePixelMatrixToCSVFile(List<List<double>> pixelMatrix, string fileName)
         {
             using (StreamWriter streamWriter = new StreamWriter(fileName))
@@ -57,6 +76,24 @@ namespace NeuralNetwork
                 foreach (List<double> pixelLine in pixelMatrix)
                     streamWriter.WriteLine(string.Join(";", pixelLine));
             }
+        }
+        public static Bitmap CreateBitmapFromMnistImage(byte[,] mnistImage)
+        {
+            int pixelsCount = 28;
+
+            Bitmap img = new Bitmap(pixelsCount, pixelsCount);
+
+            for (int i = 0; i < pixelsCount; i++)
+            {
+                for (int j = 0; j < pixelsCount; j++)
+                {
+                    int colorComponent = 255 - mnistImage[i, j];
+                    Color newColor = Color.FromArgb(colorComponent, colorComponent, colorComponent);
+                    img.SetPixel(j, i, newColor);
+                }
+            }
+
+            return img;
         }
         public static List<(int, string)> GetRandomImagesPaths(string path)
         {
@@ -74,6 +111,25 @@ namespace NeuralNetwork
 
             Random rnd = new Random();
             return imagesPaths.OrderBy(x => rnd.Next()).ToList();
+        }
+
+        public static void CreateImagesFromMnistFile(string path, string imagesFileName, string labelsFileName)
+        {
+            Directory.CreateDirectory(path);
+
+            for (int i = 0; i < 10; i++)
+                Directory.CreateDirectory(Path.Combine(path, i.ToString()));
+
+
+            IEnumerable<TestCase> testCases = FileReaderMNIST.LoadImagesAndLables(labelsFileName, imagesFileName);
+
+            List<int> captions = new List<int>() { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+
+            foreach (TestCase test in testCases)
+            {
+                Bitmap bitmap = CreateBitmapFromMnistImage(test.Image);
+                bitmap.Save(Path.Combine(path, test.Label.ToString(), $"{captions[test.Label]++}.png"));
+            }
         }
     }
 }
