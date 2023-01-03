@@ -1,14 +1,20 @@
 ﻿using MNIST.IO;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 
 namespace NeuralNetwork
 {
+    /// <summary>
+    /// Вспомогательный класс для работы с изображениями MNIST и обычными картинками
+    /// </summary>
     public static class ImageHelper
     {
+        /// <summary>
+        /// Конвертирует картинку во входной сигнал
+        /// </summary>
+        /// <param name="fileName">путь к картинке</param>
+        /// <returns></returns>
         public static List<double> ConvertImageToFunctionSignal(string fileName)
         {
             List<double> functionSignal = new List<double>();
@@ -26,7 +32,12 @@ namespace NeuralNetwork
                 }
 
             return functionSignal;
-        }
+        }        
+        /// <summary>
+        /// Конвертирует картинку MNIST во входной сигнал (вектор из 784 значений)
+        /// </summary>
+        /// <param name="image">изображение MNIST</param>
+        /// <returns></returns>
         public static List<double> ConvertImageToFunctionSignal(byte[,] image)
         {
             List<double> functionSignal = new List<double>();
@@ -36,7 +47,12 @@ namespace NeuralNetwork
                     functionSignal.Add(image[i, j] == 0 ? 0.0 : 1.0);
 
             return functionSignal;
-        }
+        }        
+        /// <summary>
+        /// Конвертирует картинку в матрицу из нулей и единичек
+        /// </summary>
+        /// <param name="fileName">путь к картинке</param>
+        /// <returns></returns>
         public static List<List<double>> ConvertImageToPixelMatrix(string fileName)
         {
             Bitmap img = new Bitmap(fileName);
@@ -60,7 +76,12 @@ namespace NeuralNetwork
             }
 
             return pixelMatrix;
-        }
+        }        
+        /// <summary>
+        /// Конвертирует изображение MNIST в матрицу из нулей и единичек
+        /// </summary>
+        /// <param name="image">изображение MNIST</param>
+        /// <returns></returns>
         public static List<List<int>> ConvertBytesToPixelMatrix(byte[,] image)
         {
             List<List<int>> pixelMatrix = new List<List<int>>();
@@ -78,7 +99,12 @@ namespace NeuralNetwork
             }
 
             return pixelMatrix;
-        }
+        }        
+        /// <summary>
+        /// Записывает матрицу из нулей и единичек в файл
+        /// </summary>
+        /// <param name="pixelMatrix">пиксельная матрица (из нулей и единичек)</param>
+        /// <param name="fileName">путь к файлу</param>
         public static void WritePixelMatrixToCSVFile(List<List<double>> pixelMatrix, string fileName)
         {
             using (StreamWriter streamWriter = new StreamWriter(fileName))
@@ -87,6 +113,11 @@ namespace NeuralNetwork
                     streamWriter.WriteLine(string.Join(";", pixelLine));
             }
         }
+        /// <summary>
+        /// Создает объект Bitmap из изображения MNIST
+        /// </summary>
+        /// <param name="mnistImage">изображение MNIST</param>
+        /// <returns></returns>
         public static Bitmap CreateBitmapFromMnistImage(byte[,] mnistImage)
         {
             int pixelsCount = 28;
@@ -104,31 +135,19 @@ namespace NeuralNetwork
             }
 
             return img;
-        }
-        public static List<(int, string)> GetRandomImagesPaths(string path)
-        {
-            List<(int, string)> imagesPaths = new List<(int, string)>();
-
-            string[] catalogsWithDigits = Directory.GetDirectories(path);
-
-            for (int i = 0; i < catalogsWithDigits.Length; i++)
-            {
-                string[] images = Directory.GetFiles(catalogsWithDigits[i]);
-
-                for (int j = 0; j < images.Length; j++)
-                    imagesPaths.Add((i, images[j]));
-            }
-
-            Random rnd = new Random();
-            return imagesPaths.OrderBy(x => rnd.Next()).ToList();
-        }
+        }        
+        /// <summary>
+        /// Данный метод создает картинки из бинарных файлов MNIST и сохраняет их в директорию
+        /// </summary>
+        /// <param name="path">путь к директории</param>
+        /// <param name="imagesFileName">путь к бинарному MNIST файлу с картинками</param>
+        /// <param name="labelsFileName">путь к бинарному MNIST файлу с метками</param>
         public static void CreateImagesFromMnistFile(string path, string imagesFileName, string labelsFileName)
         {
             Directory.CreateDirectory(path);
 
             for (int i = 0; i < 10; i++)
                 Directory.CreateDirectory(Path.Combine(path, i.ToString()));
-
 
             IEnumerable<TestCase> testCases = FileReaderMNIST.LoadImagesAndLables(labelsFileName, imagesFileName);
 

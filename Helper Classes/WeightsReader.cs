@@ -5,8 +5,16 @@ using System.Linq;
 
 namespace NeuralNetwork
 {
+    /// <summary>
+    /// Вспомогательный класс для чтения весовых коэффициентов из csv-файлов
+    /// </summary>
     public static class WeightsReader
     {
+        /// <summary>
+        /// Возвращает данные для формирования весовых коэффициентов для скрытых слоев из csv-файла
+        /// </summary>
+        /// <param name="fileName">путь к csv-файлу</param>
+        /// <returns></returns>
         public static List<List<List<double>>> ReadHiddenLayersWeightsFromCSVFile(string fileName)
         {
             List<List<List<double>>> hiddenLayersWeights = new List<List<List<double>>>();
@@ -33,6 +41,11 @@ namespace NeuralNetwork
 
             return hiddenLayersWeights;
         }
+        /// <summary>
+        /// Возвращает данные для формирования весовых коэффициентов для выходного слоя из csv-файла
+        /// </summary>
+        /// <param name="fileName">путь к csv-файлу</param>
+        /// <returns></returns>
         public static List<List<double>> ReadOutputLayerWeightsFromCSVFile(string fileName)
         {
             List<List<double>> outputLayerWeights = new List<List<double>>();

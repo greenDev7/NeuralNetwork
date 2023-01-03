@@ -2,6 +2,9 @@
 
 namespace NeuralNetwork
 {
+    /// <summary>
+    /// Тестовый класс для тестирования и отладки метода Train() класса Network
+    /// </summary>
     public class TestTrain
     {
         public List<(List<double>, List<double>)> TrainingSet { get; set; }
