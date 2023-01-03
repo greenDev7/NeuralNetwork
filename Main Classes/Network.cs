@@ -20,7 +20,7 @@ namespace NeuralNetwork
         {
             this.HiddenLayers = HiddenLayers;
             this.OutputLayer = OutputLayer;
-        }        
+        }
 
         /// <summary>
         /// Инициализирует нейросеть с помощью входных параметров
@@ -30,6 +30,8 @@ namespace NeuralNetwork
         /// <param name="outputActivationFunction">функция активации у нейронов выходного слоя</param>
         /// <param name="hiddenLayersDimensions">размерности скрытых слоев</param>
         /// <param name="hiddenActivationFunctions">массив функций активаций нейронов скрытых слоев</param>
+        /// <param name="randomMinValue">левая граница для рандомных чисел</param>
+        /// <param name="randomMaxValue">правая граница для рандомных чисел</param>
         public Network(int inputLayerDimension, int outputLayerNeuronsCount, Func<double, double> outputActivationFunction, int[] hiddenLayersDimensions = null, 
             Func<double, double>[] hiddenActivationFunctions = null, double randomMinValue = 0.0, double randomMaxValue = 1.0)
         {
@@ -38,8 +40,8 @@ namespace NeuralNetwork
             // Если есть скрытые слои
             if (hiddenLayersDimensions != null)
             {
-                if (hiddenLayersDimensions.Length != hiddenActivationFunctions.Length)
-                    throw new Exception("Количество скрытых слоев не равно количеству функций активации для скрытых слоев");
+                //if (hiddenLayersDimensions.Length != hiddenActivationFunctions.Length)
+                //    throw new Exception("Количество скрытых слоев не равно количеству функций активации для скрытых слоев");
 
                 #region Инициализируем весовые коэффициенты на скрытых слоях
 
@@ -66,14 +68,17 @@ namespace NeuralNetwork
 
             // Если есть скрытые слои, то количество весовых коэффицинтов у нейронов выходного слоя равно количеству нейронов последнего скрытого слоя
             // Если скрытых слоев нет, то количество весовых коэффицинтов у нейронов выходного слоя равно количеству нейронов входного слоя
-
             int outputWeightsCount = hiddenLayersDimensions != null ? hiddenLayersDimensions.Last() : inputLayerDimension;
 
             OutputLayer = new Layer(CreateNeurons(outputLayerNeuronsCount, outputWeightsCount, randomMinValue, randomMaxValue, outputActivationFunction, random));
 
             #endregion
         }
-
+        /// <summary>
+        /// Запускает алгоритм прямого распространения сигнала и возвращает ответ от сети
+        /// </summary>
+        /// <param name="functionSignal">функциональный сигнал (стимул), поступающий на вход нейросети</param>
+        /// <returns></returns>
         public List<double> MakePropagateForward(List<double> functionSignal)
         {
             // Если имеются скрытые слои, то передаем сигнал по скрытым слоям
@@ -85,7 +90,7 @@ namespace NeuralNetwork
             return SetInputSignalAndReturnOutputSignal(OutputLayer, functionSignal);
         }
         /// <summary>
-        /// Присваивает слою входной сигнал, инициализирует локальные индуцированные поля нейронов и возвращает выходной сигнал
+        /// Задает слою входной сигнал, устанавливает локальные индуцированные поля нейронов и возвращает выходной сигнал
         /// </summary>
         /// <param name="layer">слой</param>
         /// <param name="functionSignal">входной сигнал</param>
@@ -127,12 +132,13 @@ namespace NeuralNetwork
         /// <param name="random">экземпляр генератора случайных чисел</param>
         /// <param name="minValue">левая граница интеравала</param>
         /// <param name="maxValue">правая граница интеравала</param>
+        /// <param name="currentIndex">текущий индекс генерируемого значения</param>
         /// <returns></returns>
-        private double CreateRandomValue(Random random, double minValue, double maxValue, int objectIndex)
+        private double CreateRandomValue(Random random, double minValue, double maxValue, int currentIndex)
         {
             double randomDouble = random.NextDouble() * (maxValue - minValue) + minValue;
 
-            if (objectIndex % 2 == 0)
+            if (currentIndex % 2 == 0) // Будем чередовать знаки через один
                 return -randomDouble;
 
             return randomDouble;
@@ -153,7 +159,11 @@ namespace NeuralNetwork
                 weights.Add(CreateRandomValue(random, minValue, maxValue, i));
 
             return weights;
-        }     
+        }
+        /// <summary>
+        /// Записывает данные по скрытым слоям (количество скрытых слоев, их размерности, весовые коэффициенты скрытых слоев сети) в csv файл
+        /// </summary>
+        /// <param name="fileName">имя файла для записи</param>
         public void WriteHiddenWeightsToCSVFile(string fileName)
         {
             if (HiddenLayers == null)
@@ -168,7 +178,11 @@ namespace NeuralNetwork
                     textWriter.WriteLine("{0};{1}", neuron.Bias, string.Join(";", neuron.Weights));
 
             textWriter.Close();
-        }
+        }        
+        /// <summary>
+        /// Записывает весовые коэффициенты выходного слоя сети в csv файл
+        /// </summary>
+        /// <param name="fileName">имя файла для записи</param>
         public void WriteOutputWeightsToCSVFile(string fileName)
         {
             TextWriter textWriter = new StreamWriter(fileName);
@@ -177,7 +191,15 @@ namespace NeuralNetwork
                 textWriter.WriteLine("{0};{1}", neuron.Bias, string.Join(";", neuron.Weights));
 
             textWriter.Close();
-        }
+        }        
+        /// <summary>
+        /// Запускает алгоритм обучения нейронной сети
+        /// </summary>
+        /// <param name="imagesFileName">путь к бинарному файлу MNIST с изображениями</param>
+        /// <param name="labelsFileName">путь к бинарному файлу MNIST с метками (наименованиями цифр)</param>
+        /// <param name="learningRateParameter">параметр скорости обучения</param>
+        /// <param name="numberOfEpochs">количество эпох</param>
+        /// <returns>Массив значений общей энергии ошибки</returns>
         public List<double> Train(string imagesFileName, string labelsFileName, double learningRateParameter, int numberOfEpochs)
         {
             List<double> currentErrorList = new List<double>();
@@ -203,6 +225,12 @@ namespace NeuralNetwork
 
             return currentErrorList;
         }
+        /// <summary>
+        /// Тестовый метод. Использовался мною для отладки метода Train()
+        /// </summary>
+        /// <param name="totalErrorEnergy">Общая энергия ошибки сети</param>
+        /// <param name="learningRateParameter">параметр скорости обучения</param>
+        /// <returns>Массив значений общей энергии ошибки</returns>
         public List<double> TestTrain(out double totalErrorEnergy, double learningRateParameter)
         {
             TestTrain test = new TestTrain();
@@ -227,22 +255,28 @@ namespace NeuralNetwork
 
             return currentErrorList;
         }
+        /// <summary>
+        /// Запускает алгоритм обратного распространения ошибки
+        /// </summary>
+        /// <param name="errorSignal">сигнал ошибки</param>
+        /// <param name="learningRateParameter">параметр скорости обучения</param>
         private void MakePropagateBackward(List<double> errorSignal, double learningRateParameter)
         {
-            OutputLayer.CalculateAndSetLocalGradients(errorSignal);
-            OutputLayer.AdjustWeights(learningRateParameter);
+            OutputLayer.CalculateAndSetLocalGradients(errorSignal); // Вычисляем локальные градиенты для выходного слоя
+            OutputLayer.AdjustWeights(learningRateParameter); // Корректируем весовые коэффициенты
 
-            // Если скрытых слоев нет, то выходим из метода
+            // Если скрытых слоев нет, то заканчиваем процесс
             if (HiddenLayers == null)
                 return;
 
-            Layer previousLayer = OutputLayer;
+            Layer currentLayer = OutputLayer; 
 
+            // Вычисляем локальные градиенты для скрытых слоев
             for (int i = HiddenLayers.Count - 1; i >= 0; i--)
             {
-                HiddenLayers[i].CalculateAndSetLocalGradients(previousLayer);
+                HiddenLayers[i].CalculateAndSetLocalGradients(currentLayer);
                 HiddenLayers[i].AdjustWeights(learningRateParameter);
-                previousLayer = HiddenLayers[i];
+                currentLayer = HiddenLayers[i];
             }           
         }
         /// <summary>
@@ -250,7 +284,7 @@ namespace NeuralNetwork
         /// </summary>
         /// <param name="desiredResponse">желаемый отклик сети</param>
         /// <param name="outputSignal">действительный отклик сети (функциональный сигнал, генерируемый на выходе работы сети)</param>
-        /// <returns></returns>
+        /// <returns>Сигнал ошибки</returns>
         private List<double> GetErrorSignal(List<double> desiredResponse, List<double> outputSignal)
         {
             List<double> errorSignal = new List<double>();
