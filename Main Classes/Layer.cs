@@ -5,7 +5,6 @@ namespace NeuralNetwork
     public class Layer
     {
         public List<Neuron> Neurons { get; }
-
         public List<double> InputSignals { get; set; }
 
         public Layer(List<Neuron> Neurons)
@@ -13,6 +12,10 @@ namespace NeuralNetwork
             this.Neurons = Neurons;            
         }
 
+        /// <summary>
+        /// Возвращает функциональный сигнал от нейронов данного слоя
+        /// </summary>
+        /// <returns></returns>
         internal List<double> ProduceSignals()
         {
             List<double> currentSignals = new List<double>();
@@ -22,13 +25,19 @@ namespace NeuralNetwork
        
             return currentSignals;
         }
-
+        /// <summary>
+        /// Вычисляет и устанавливает нейронам ВЫХОДНОГО слоя локальные градиенты
+        /// </summary>
+        /// <param name="errorSignal">сигнал ошибки</param>
         internal void CalculateAndSetLocalGradients(List<double> errorSignal)
         {
             for (int i = 0; i < Neurons.Count; i++)
                 Neurons[i].SetLocalGradient(errorSignal[i] * ActivationFunctions.SigmoidFunctionsDerivative((double)Neurons[i].InducedLocalField));
         }
-        
+        /// <summary>
+        /// Вычисляет и устанавливает нейронам СКРЫТОГО слоя локальные градиенты на основе предыдущего слоя в алгоритме обратного распространения
+        /// </summary>
+        /// <param name="previousLayer">предыдущий слой (расположенный правее текущего)</param>
         internal void CalculateAndSetLocalGradients(Layer previousLayer)
         {
 
@@ -41,7 +50,12 @@ namespace NeuralNetwork
                 Neurons[i].SetLocalGradient(innerSum * ActivationFunctions.SigmoidFunctionsDerivative((double)Neurons[i].InducedLocalField));
             }
         }
-
+        /// <summary>
+        /// Возвращает локальное скалярное произведение (см. Хайкин, стр. 231, формула 4.24)
+        /// </summary>
+        /// <param name="associatedWeights">синаптические связи (весовые коэффициенты, связывающие нейрон текущего слоя и нейроны предыдущего)</param>
+        /// <param name="previousLayer">предыдущий слой нейронов</param>
+        /// <returns></returns>
         private double GetInnerSum(List<double> associatedWeights, Layer previousLayer)
         {
             double innerSum = 0.0;
@@ -51,7 +65,12 @@ namespace NeuralNetwork
 
             return innerSum;
         }
-
+        /// <summary>
+        /// Возвращает весовые коэффициенты, связывающие нейрон текущего слоя и нейроны предыдущего слоя
+        /// </summary>
+        /// <param name="previousLayer">предыдущий слой</param>
+        /// <param name="neuronPositionInCurrentLayer">номер нейрона в текущем слое</param>
+        /// <returns></returns>
         private List<double> GetAssociatedWeights(Layer previousLayer, int neuronPositionInCurrentLayer)
         {
             List<double> associatedWeights = new List<double>();
@@ -61,7 +80,10 @@ namespace NeuralNetwork
 
             return associatedWeights;
         }
-
+        /// <summary>
+        /// Корректирует весовые коэффициенты нейронов данного слоя
+        /// </summary>
+        /// <param name="learningRateParameter">параметр скорости обучения</param>
         internal void AdjustWeights(double learningRateParameter)
         {
             for (int i = 0; i < Neurons.Count; i++)
