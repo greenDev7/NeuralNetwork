@@ -269,14 +269,14 @@ namespace NeuralNetwork
             if (HiddenLayers == null)
                 return;
 
-            Layer currentLayer = OutputLayer; 
+            Layer previousLayer = OutputLayer; 
 
             // Вычисляем локальные градиенты для скрытых слоев
             for (int i = HiddenLayers.Count - 1; i >= 0; i--)
             {
-                HiddenLayers[i].CalculateAndSetLocalGradients(currentLayer);
+                HiddenLayers[i].CalculateAndSetLocalGradients(previousLayer);
                 HiddenLayers[i].AdjustWeights(learningRateParameter);
-                currentLayer = HiddenLayers[i];
+                previousLayer = HiddenLayers[i];
             }           
         }
         /// <summary>
