@@ -38,7 +38,7 @@ namespace NeuralNetwork
         internal void CalculateAndSetLocalGradients(List<double> errorSignal)
         {
             for (int i = 0; i < Neurons.Count; i++)
-                Neurons[i].SetLocalGradient(errorSignal[i] * ActivationFunctions.SigmoidFunctionsDerivative((double)Neurons[i].InducedLocalField));
+                Neurons[i].SetLocalGradient(errorSignal[i] * ActivationFunctions.SigmoidFunctionsDerivative(Neurons[i].InducedLocalField));
         }
         /// <summary>
         /// Вычисляет и устанавливает нейронам СКРЫТОГО слоя локальные градиенты на основе предыдущего слоя в алгоритме обратного распространения
@@ -46,14 +46,13 @@ namespace NeuralNetwork
         /// <param name="previousLayer">предыдущий слой (расположенный правее текущего)</param>
         internal void CalculateAndSetLocalGradients(Layer previousLayer)
         {
-
             for (int i = 0; i < Neurons.Count; i++)
             {
                 List<double> associatedWeights = GetAssociatedWeights(previousLayer, i);
 
                 double innerSum = GetInnerSum(associatedWeights, previousLayer);
 
-                Neurons[i].SetLocalGradient(innerSum * ActivationFunctions.SigmoidFunctionsDerivative((double)Neurons[i].InducedLocalField));
+                Neurons[i].SetLocalGradient(innerSum * ActivationFunctions.SigmoidFunctionsDerivative(Neurons[i].InducedLocalField));
             }
         }
         /// <summary>
@@ -90,10 +89,10 @@ namespace NeuralNetwork
         /// Корректирует весовые коэффициенты нейронов данного слоя
         /// </summary>
         /// <param name="learningRateParameter">параметр скорости обучения</param>
-        internal void AdjustWeights(double learningRateParameter)
+        internal void AdjustWeightsAndBias(double learningRateParameter)
         {
             for (int i = 0; i < Neurons.Count; i++)
-                Neurons[i].AdjustWeights(learningRateParameter, InputSignals);
+                Neurons[i].AdjustWeightsAndBias(learningRateParameter, InputSignals);
         }
     }
 }
