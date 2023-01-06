@@ -84,7 +84,7 @@ private void learnButton_Click(object sender, EventArgs e)
             // Записываем скорректированные весовые коэффициенты в файлы
             network.WriteHiddenWeightsToCSVFile(Path.Combine(myDocumentFolder, $"adjustedHiddenLayerWeights_acc{accuracy.ToString().Replace(",", string.Empty)}.csv"));
             network.WriteOutputWeightsToCSVFile(Path.Combine(myDocumentFolder, $"adjustedOutputLayerWeights_acc{accuracy.ToString().Replace(",", string.Empty)}.csv"));
-            // и в в JSON файлы
+            // и в JSON файлы
             network.WriteHiddenWeightsToJsonFile(Path.Combine(myDocumentFolder, $"adjustedHiddenLayerWeights_acc{accuracy.ToString().Replace(",", string.Empty)}.json"));
             network.WriteOutputWeightsToJsonFile(Path.Combine(myDocumentFolder, $"adjustedOutputLayerWeights_acc{accuracy.ToString().Replace(",", string.Empty)}.json"));
         }
