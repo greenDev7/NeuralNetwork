@@ -5,10 +5,25 @@ namespace NeuralNetwork
 {
     public class Neuron
     {
+        /// <summary>
+        /// Весовые коэффициенты (синаптические связи)
+        /// </summary>
         public List<double> Weights { get; }
+        /// <summary>
+        /// Пороговое значение
+        /// </summary>
         public double Bias { get; }
+        /// <summary>
+        /// Функция активации
+        /// </summary>
         private Func<double, double> ActivationFunction { get; }
+        /// <summary>
+        /// Индуцированное локальное поле
+        /// </summary>
         public double InducedLocalField { get; private set; }
+        /// <summary>
+        /// Локальный градиент
+        /// </summary>
         public double LocalGradient { get; private set; }
 
         /// <summary>

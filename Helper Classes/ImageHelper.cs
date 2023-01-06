@@ -34,7 +34,7 @@ namespace NeuralNetwork
             return functionSignal;
         }        
         /// <summary>
-        /// Конвертирует картинку MNIST во входной сигнал (вектор из 784 значений)
+        /// Конвертирует изображение MNIST во входной сигнал (вектор из 784 значений)
         /// </summary>
         /// <param name="image">изображение MNIST</param>
         /// <returns></returns>

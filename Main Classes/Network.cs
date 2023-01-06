@@ -8,7 +8,13 @@ namespace NeuralNetwork
 {
     public class Network
     {
+        /// <summary>
+        /// Скрытые слои
+        /// </summary>
         public List<Layer> HiddenLayers { get; }
+        /// <summary>
+        /// Выходной слой
+        /// </summary>
         public Layer OutputLayer { get; }
 
         /// <summary>
@@ -67,7 +73,7 @@ namespace NeuralNetwork
             #region Инициализируем весовые коэффициенты выходного слоя
 
             // Если есть скрытые слои, то количество весовых коэффицинтов у нейронов выходного слоя равно количеству нейронов последнего скрытого слоя
-            // Если скрытых слоев нет, то количество весовых коэффицинтов у нейронов выходного слоя равно количеству нейронов входного слоя
+            // Если скрытых слоев нет, то количество весовых коэффицинтов у нейронов выходного слоя равно количеству входов сети
             int outputWeightsCount = hiddenLayersDimensions != null ? hiddenLayersDimensions.Last() : inputLayerDimension;
 
             OutputLayer = new Layer(CreateNeurons(outputLayerNeuronsCount, outputWeightsCount, randomMinValue, randomMaxValue, outputActivationFunction, random));
@@ -84,10 +90,10 @@ namespace NeuralNetwork
             // Если имеются скрытые слои, то передаем сигнал по скрытым слоям
             if (HiddenLayers != null)
                 foreach (Layer hiddenLayer in HiddenLayers)
-                    functionSignal = SetInputSignalAndReturnOutputSignal(hiddenLayer, functionSignal);
+                    functionSignal = SetInputSignalAndInducedLocalFieldAndReturnOutputSignal(hiddenLayer, functionSignal);
 
             // Возвращаем сигнал от выходного слоя
-            return SetInputSignalAndReturnOutputSignal(OutputLayer, functionSignal);
+            return SetInputSignalAndInducedLocalFieldAndReturnOutputSignal(OutputLayer, functionSignal);
         }
         /// <summary>
         /// Задает слою входной сигнал, устанавливает локальные индуцированные поля нейронов и возвращает выходной сигнал
@@ -95,7 +101,7 @@ namespace NeuralNetwork
         /// <param name="layer">слой</param>
         /// <param name="functionSignal">входной сигнал</param>
         /// <returns>выходной сигнал</returns>
-        private List<double> SetInputSignalAndReturnOutputSignal(Layer layer, List<double> functionSignal)
+        private List<double> SetInputSignalAndInducedLocalFieldAndReturnOutputSignal(Layer layer, List<double> functionSignal)
         {
             layer.InputSignals = functionSignal;
 
@@ -161,7 +167,7 @@ namespace NeuralNetwork
             return weights;
         }
         /// <summary>
-        /// Записывает данные по скрытым слоям (количество скрытых слоев, их размерности, весовые коэффициенты скрытых слоев сети) в csv файл
+        /// Записывает данные по скрытым слоям (количество скрытых слоев, их размерности, пороговые значения, весовые коэффициенты) в csv файл
         /// </summary>
         /// <param name="fileName">имя файла для записи</param>
         public void WriteHiddenWeightsToCSVFile(string fileName)
@@ -216,11 +222,13 @@ namespace NeuralNetwork
                     List<double> outputSignal = MakePropagateForward(functionSignal);
 
                     List<double> errorSignal = GetErrorSignal(desiredResponse, outputSignal);
-                    double currentErrorEnergy = GetCurrentErrorEnergy(errorSignal);
-                    currentErrorList.Add(currentErrorEnergy);
+                    //double currentErrorEnergy = GetCurrentErrorEnergy(errorSignal);
+                    //currentErrorList.Add(currentErrorEnergy);
 
                     MakePropagateBackward(errorSignal, learningRateParameter);
                 }
+
+                Console.WriteLine("epoch " + e.ToString() + " finished");
             }
 
             return currentErrorList;

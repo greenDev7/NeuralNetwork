@@ -4,7 +4,13 @@ namespace NeuralNetwork
 {
     public class Layer
     {
+        /// <summary>
+        /// Нейроны
+        /// </summary>
         public List<Neuron> Neurons { get; }
+        /// <summary>
+        /// Входной сигнал
+        /// </summary>
         public List<double> InputSignals { get; set; }
 
         public Layer(List<Neuron> Neurons)
