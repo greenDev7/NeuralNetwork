@@ -27,28 +27,29 @@ namespace NeuralNetwork
 
             #region Блок для инициализации нейросети с помощью весовых коэффициентов из файлов csv
 
-            // List<Layer> hiddenLayers = InitializeHiddenLayersWeightsFromCSVFile(Path.Combine(myDocumentFolder, "adjustedHiddenLayerWeights_acc9153.csv"));
-            // Layer outputLayer = InitializeOutputLayerWeightsFromCSVFile(Path.Combine(myDocumentFolder, "adjustedOutputLayerWeights_acc9153.csv"));
-
-            // Network network = new Network(hiddenLayers, outputLayer);
-
+            //// Считываем весовые коэффициенты из файлов
+            // List<Layer> hiddenLayers = InitializeHiddenLayersWeightsFromCSVFile(Path.Combine(myDocumentFolder, "adjustedHiddenLayerWeights_acc9572_16.csv"));
+            // Layer outputLayer = InitializeOutputLayerWeightsFromCSVFile(Path.Combine(myDocumentFolder, "adjustedOutputLayerWeights_acc9572_16.csv"));
+            ////Инициализируем нейросеть
+            //Network network = new Network(hiddenLayers, outputLayer);
+            
             #endregion
 
 
             #region Блок для инициализация нейросети рандомными значениями и ее обучение
 
-            //Инициализируем нейросеть с помощью заданных параметров
+            // Инициализируем нейросеть с помощью заданных параметров
 
             int hiddenLayersCount = 1;  // Задаем количество скрытых слоев
             int[] hiddenLayersDimensions = new int[hiddenLayersCount]; // Массив для хранения количества нейронов на каждом скрытом слое
             Func<double, double>[] hiddenActivationFunctions = new Func<double, double>[hiddenLayersCount]; // Массив для хранения функций активации на каждом скрытом слое
 
-            hiddenLayersDimensions[0] = 35; // У нас один скрытый слой на котором 35 нейронов
+            hiddenLayersDimensions[0] = 80; // У нас один скрытый слой на котором 80 нейронов
             hiddenActivationFunctions[0] = ActivationFunctions.SigmoidFunction; // И для всех нейронов этого скрытого слоя используется сигмоидальная функция активации
 
-            // 784 входа - это размер массива полученного из изображения(28 * 28 пикселей), 10 выходных нейронов
+            // 784 входа - это размер массива полученного из изображения (28 * 28 пикселей)
             Network network = new Network(784, 10, ActivationFunctions.SigmoidFunction, hiddenLayersDimensions, hiddenActivationFunctions);
-            List<double> errorList = network.Train(trainingImagesPath, trainingLabelsPath, 0.2, 1); // Запускаем обучение
+            network.Train(trainingImagesPath, trainingLabelsPath, 0.2, 16); // Запускаем обучение
 
             #endregion
 
@@ -64,16 +65,16 @@ namespace NeuralNetwork
                 List<double> functionSignal = ImageHelper.ConvertImageToFunctionSignal(test.Image); // Преобразуем изображение в вектор размерности 784 состоящий из нулей и единичек
 
                 List<double> outputSignal = network.MakePropagateForward(functionSignal); // Получаем сигнал от нейросети
-
                 int predictedDigit = outputSignal.IndexOf(outputSignal.Max()); // Предсказанную цифру находим как индекс максимального элемента массива
 
                 // Если нейросеть выдала некорректный ответ
                 if (test.Label != predictedDigit)
                 {
                     incorrectPredictionsCount++;
-                    //Bitmap bitmap = ImageHelper.CreateBitmapFromMnistImage(test.Image); // Получим это изображение
+                    // Получим это изображение
+                    Bitmap bitmap = ImageHelper.CreateBitmapFromMnistImage(test.Image);                    
                     // И сохраним в папку IncorrectPredictions
-                    //bitmap.Save(Path.Combine(myDocumentFolder, "IncorrectPredictions", $"{incorrectPredictionsCount}_{test.Label}_{predictedDigit}.png"));
+                    bitmap.Save(Path.Combine(myDocumentFolder, "IncorrectPredictions", $"{incorrectPredictionsCount}_{test.Label}_{predictedDigit}.png"));
                 }
             }
 
@@ -82,8 +83,11 @@ namespace NeuralNetwork
 
 
             // Записываем скорректированные весовые коэффициенты в файлы
-            network.WriteHiddenWeightsToCSVFile(Path.Combine(myDocumentFolder, "adjustedHiddenLayerWeights_accXX.csv"));
-            network.WriteOutputWeightsToCSVFile(Path.Combine(myDocumentFolder, "adjustedOutputLayerWeights_accXX.csv"));
+            network.WriteHiddenWeightsToCSVFile(Path.Combine(myDocumentFolder, $"adjustedHiddenLayerWeights_acc{accuracy.ToString().Replace(",", string.Empty)}.csv"));
+            network.WriteOutputWeightsToCSVFile(Path.Combine(myDocumentFolder, $"adjustedOutputLayerWeights_acc{accuracy.ToString().Replace(",", string.Empty)}.csv"));
+            // и в в JSON файлы
+            network.WriteHiddenWeightsToJsonFile(Path.Combine(myDocumentFolder, $"adjustedHiddenLayerWeights_acc{accuracy.ToString().Replace(",", string.Empty)}.json"));
+            network.WriteOutputWeightsToJsonFile(Path.Combine(myDocumentFolder, $"adjustedOutputLayerWeights_acc{accuracy.ToString().Replace(",", string.Empty)}.json"));
         }
 
         /// <summary>
@@ -127,6 +131,7 @@ namespace NeuralNetwork
             }
 
             return hiddenLayers;
-        }        
+        }       
+
     }
 }
