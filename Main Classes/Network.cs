@@ -128,6 +128,7 @@ namespace NeuralNetwork
             {
                 List<double> weights = CreateRandomWeights(weightsCount, weightsMinValue, weightsMaxValue, random);
                 neurons.Add(new Neuron(activationFunction, weights, CreateRandomValue(random, weightsMinValue, weightsMaxValue, i)));
+                //neurons.Add(new Neuron(activationFunction, weights));
             }
 
             return neurons;
@@ -197,7 +198,7 @@ namespace NeuralNetwork
                 textWriter.WriteLine("{0};{1}", neuron.Bias, string.Join(";", neuron.Weights));
 
             textWriter.Close();
-        }        
+        }
         /// <summary>
         /// Запускает алгоритм обучения нейронной сети
         /// </summary>
@@ -205,33 +206,29 @@ namespace NeuralNetwork
         /// <param name="labelsFileName">путь к бинарному файлу MNIST с метками (наименованиями цифр)</param>
         /// <param name="learningRateParameter">параметр скорости обучения</param>
         /// <param name="numberOfEpochs">количество эпох</param>
-        /// <returns>Массив значений общей энергии ошибки</returns>
-        public List<double> Train(string imagesFileName, string labelsFileName, double learningRateParameter, int numberOfEpochs)
+        public void Train(string imagesFileName, string labelsFileName, double learningRateParameter, int numberOfEpochs)
         {
-            List<double> currentErrorList = new List<double>();
-
             for (int e = 0; e < numberOfEpochs; e++)
             {
+                // Получаем изображения
                 IEnumerable<TestCase> testCases = FileReaderMNIST.LoadImagesAndLables(labelsFileName, imagesFileName);
 
                 foreach (TestCase test in testCases)
                 {
+                    // Конвертируем изображение в функциональный сигнал
                     List<double> functionSignal = ImageHelper.ConvertImageToFunctionSignal(test.Image);
+                    // Получаем ожидаемый ответ
                     List<double> desiredResponse = GetDesiredResponse(test.Label);
-
+                    // Получаем ответ от сети (прямой проход)
                     List<double> outputSignal = MakePropagateForward(functionSignal);
-
+                    // Вычисляем сигнал ошибки
                     List<double> errorSignal = GetErrorSignal(desiredResponse, outputSignal);
-                    //double currentErrorEnergy = GetCurrentErrorEnergy(errorSignal);
-                    //currentErrorList.Add(currentErrorEnergy);
-
+                    // Запускаем алгоритм обратного распространения ошибки
                     MakePropagateBackward(errorSignal, learningRateParameter);
                 }
 
-                Console.WriteLine("epoch " + e.ToString() + " finished");
+                Console.WriteLine("epoch " + e.ToString() + " finished"); // Выводим в консоль прогресс выполнения
             }
-
-            return currentErrorList;
         }
         /// <summary>
         /// Тестовый метод. Использовался мною для отладки метода Train()
@@ -270,20 +267,27 @@ namespace NeuralNetwork
         /// <param name="learningRateParameter">параметр скорости обучения</param>
         private void MakePropagateBackward(List<double> errorSignal, double learningRateParameter)
         {
-            OutputLayer.CalculateAndSetLocalGradients(errorSignal); // Вычисляем локальные градиенты для выходного слоя
-            OutputLayer.AdjustWeights(learningRateParameter); // Корректируем весовые коэффициенты
+            // Вычисляем локальные градиенты для выходного слоя
+            OutputLayer.CalculateAndSetLocalGradients(errorSignal);
+            // Корректируем весовые коэффициенты и пороговые значения выходного слоя
+            OutputLayer.AdjustWeightsAndBias(learningRateParameter);
 
             // Если скрытых слоев нет, то заканчиваем процесс
             if (HiddenLayers == null)
                 return;
 
-            Layer previousLayer = OutputLayer; 
+            // Устанавливаем выходной слой как предыдущий
+            // (для обратного прохода это тот слой, который расположен правее)
+            Layer previousLayer = OutputLayer;
 
-            // Вычисляем локальные градиенты для скрытых слоев
+            // Вычисляем локальные градиенты для скрытых слоев,
+            // при этом идем от последнего скрытого слоя к первому
             for (int i = HiddenLayers.Count - 1; i >= 0; i--)
             {
+                // Вычисляем локальные градиенты
                 HiddenLayers[i].CalculateAndSetLocalGradients(previousLayer);
-                HiddenLayers[i].AdjustWeights(learningRateParameter);
+                // Корректируем весовые коэффициенты и пороговые значения
+                HiddenLayers[i].AdjustWeightsAndBias(learningRateParameter);
                 previousLayer = HiddenLayers[i];
             }           
         }
