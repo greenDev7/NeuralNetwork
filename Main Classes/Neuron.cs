@@ -12,7 +12,7 @@ namespace NeuralNetwork
         /// <summary>
         /// Пороговое значение
         /// </summary>
-        public double Bias { get; }
+        public double Bias { get; private set; }
         /// <summary>
         /// Функция активации
         /// </summary>
@@ -66,10 +66,13 @@ namespace NeuralNetwork
         /// </summary>
         /// <param name="learningRateParameter">параметр скорости обучения</param>
         /// <param name="inputSignals">входной сигнал нейрона, заданный при прямом проходе</param>
-        internal void AdjustWeights(double learningRateParameter, List<double> inputSignals)
+        internal void AdjustWeightsAndBias(double learningRateParameter, List<double> inputSignals)
         {
             for (int i = 0; i < Weights.Count; i++)
-                Weights[i] += learningRateParameter * LocalGradient * inputSignals[i];
+            {
+                Weights[i] += learningRateParameter * LocalGradient * inputSignals[i]; // Корректируем весовые коэффициенты
+                // Bias += learningRateParameter * LocalGradient; // Корректируем пороговое значение (inputSignal для него равен 1)
+            }
         }
         /// <summary>
         /// Возвращает функциональный сигнал от данного нейрона
