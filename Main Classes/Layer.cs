@@ -48,10 +48,11 @@ namespace NeuralNetwork
         {
             for (int i = 0; i < Neurons.Count; i++)
             {
+                // Получаем весовые коэффициенты, непосредственно связанный с этим нейроном
                 List<double> associatedWeights = GetAssociatedWeights(previousLayer, i);
-
+                // Подсчитываем внутреннюю сумму
                 double innerSum = GetInnerSum(associatedWeights, previousLayer);
-
+                // Вычисляем и устанавливаем нейрону скрытого слоя локальный градиент
                 Neurons[i].SetLocalGradient(innerSum * ActivationFunctions.SigmoidFunctionsDerivative(Neurons[i].InducedLocalField));
             }
         }

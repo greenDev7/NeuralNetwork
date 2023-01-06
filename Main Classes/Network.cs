@@ -221,7 +221,7 @@ namespace NeuralNetwork
                     List<double> desiredResponse = GetDesiredResponse(test.Label);
                     // Получаем ответ от сети (прямой проход)
                     List<double> outputSignal = MakePropagateForward(functionSignal);
-                    // Вычисляем сигнал ошибки
+                    // Вычисляем сигнал ошибки как разность между ожидаемым и фактическим ответом нейросети
                     List<double> errorSignal = GetErrorSignal(desiredResponse, outputSignal);
                     // Запускаем алгоритм обратного распространения ошибки
                     MakePropagateBackward(errorSignal, learningRateParameter);
