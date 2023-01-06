@@ -1,9 +1,9 @@
 ﻿# NeuralNetwork
 
-Реализация алгоритма обратного распространения ошибки для обучения нейронной сети для распознавания рукописных цифр
+Реализация классического алгоритма обратного распространения ошибки с помощью последовательного (стохастического) режима обучения для тренировки многослойного персептрона распознаванию рукописных цифр
 
 ![](https://github.com/greenDev7/NeuralNetwork/blob/master/DigitRecognition.gif)
 
-Обученная модель с откоректированными весовыми коэффициентами находится [здесь](https://codesandbox.io/s/digit-recognition-canvas-h4nmcv)
+[Digit Recognition Canvas](https://codesandbox.io/s/digit-recognition-canvas-h4nmcv)
 
-![screenshot1](https://github.com/greenDev7/NeuralNetwork/blob/master/DigitRecognitionCanvas.png)
+[Описание алгоритма (Хабр)](https://habr.com/ru/post/708928/)
