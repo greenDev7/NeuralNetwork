@@ -4,6 +4,6 @@
 
 ![](https://github.com/greenDev7/NeuralNetwork/blob/master/DigitRecognition.gif)
 
-[Digit Recognition Canvas](https://codesandbox.io/s/digit-recognition-canvas-h4nmcv)
+[Digit Recognition Canvas](https://codesandbox.io/s/winter-dew-u26xeb)
 
 [Описание алгоритма (Хабр)](https://habr.com/ru/post/708928/)
