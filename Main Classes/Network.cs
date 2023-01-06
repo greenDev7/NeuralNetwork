@@ -1,4 +1,5 @@
 ﻿using MNIST.IO;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -200,6 +201,50 @@ namespace NeuralNetwork
             textWriter.Close();
         }
         /// <summary>
+        /// Записывает весовые коэффициенты и пороговые значения скрытых слоев в JSON-файл
+        /// </summary>
+        /// <param name="fileName"></param>
+        public void WriteHiddenWeightsToJsonFile(string fileName)
+        {
+            if (HiddenLayers == null)
+                return;
+
+            TextWriter textWriter = new StreamWriter(fileName);
+
+            List<List<Root>> roots = new List<List<Root>>();
+
+            foreach (Layer hiddenLayer in HiddenLayers)
+            {
+                List<Root> innerRoots = new List<Root>();
+
+                foreach (Neuron neuron in hiddenLayer.Neurons)
+                    innerRoots.Add(new Root(neuron.Bias, neuron.Weights));
+
+                roots.Add(innerRoots);
+            }
+
+            textWriter.WriteLine(JsonConvert.SerializeObject(roots));
+
+            textWriter.Close();
+        }
+        /// <summary>
+        /// Записывает весовые коэффициенты и пороговые значения выходного слоя в JSON-файл
+        /// </summary>
+        /// <param name="fileName"></param>
+        public void WriteOutputWeightsToJsonFile(string fileName)
+        {
+            TextWriter textWriter = new StreamWriter(fileName);
+
+            List<Root> roots = new List<Root>();
+
+            foreach (Neuron neuron in OutputLayer.Neurons)
+                roots.Add(new Root(neuron.Bias, neuron.Weights));
+           
+            textWriter.WriteLine(JsonConvert.SerializeObject(roots));
+
+            textWriter.Close();
+        }
+        /// <summary>
         /// Запускает алгоритм обучения нейронной сети
         /// </summary>
         /// <param name="imagesFileName">путь к бинарному файлу MNIST с изображениями</param>
@@ -332,6 +377,21 @@ namespace NeuralNetwork
             desiredResponse[digit] = 1.0;
 
             return desiredResponse;
+        }
+    }
+
+    /// <summary>
+    /// Вспомогательный класс для сериализации весовых коэффициентов и пороговых значений в JSON формат
+    /// </summary>
+    class Root
+    {
+        public double bias { get; set; }
+        public List<double> weights { get; set; }
+
+        public Root(double bias, List<double> weights)
+        {
+            this.bias = bias;
+            this.weights = weights;
         }
     }
 }
